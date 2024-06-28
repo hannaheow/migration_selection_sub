@@ -6,6 +6,3 @@ In this aim, I test the following three hypotheses:
 3.	Considering unmeasured factors in county-to-county migration flows improves our ability to explain county-level health outcomes as well as the differential role that migration plays in urban versus rural counties.
 
 This aim uses publicly accessible data from the IRS and CDC WONDER. 
-
-The simulation part of this aim requires UW Madison's CHTC system. Here's the help page for CHTC (for my future reference) 
-- https://chtc.cs.wisc.edu/uw-research-computing/connecting
