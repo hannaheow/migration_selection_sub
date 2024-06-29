@@ -149,40 +149,44 @@ Because we know county-level health to be related to county-level natality, and 
 
 In order to maximize the number of counties per category, we chose to use only two urbanization categorizations: urban and rural, where urban includes large central metro, medium metro, and small metro counties <!--# i verified this using cococino county as a check - these definitions are also outlined and cited in the data section --> and rural includes micropolitan and noncore counties. We assessed `r length(unique(migterm_imp$destid[migterm_imp$rural == 1]))` unique rural counties and `r length(unique(migterm_imp$destid[migterm_imp$rural == 0]))` unique urban counties. Again, we utilized the same steps outlined above to determine which model had the most explanatory power and lowest BIC score.
 
-<!--# need to update this table and/or decide no table for this section-->
+```{r mod selection w spatial and urb accounted for, echo = FALSE, message = FALSE, warning = FALSE, include = FALSE}
 
-```{r urban rural mod selection, echo = FALSE, message = FALSE, warning = FALSE, include = FALSE}
-#BIC scores were generated in "spatial mod selection.R"  
-load("temporary output/bicspat_rural.Rdata")
-load("temporary output/bicspat_urb.Rdata")
+#BIC scores generated in spatial_mod_selection_with_urb_corrected.R 
+load("chtc_outputs/output_modselection/bicspat.txt")
+load("chtc_outputs/output_modselection/bicspatr.txt")
 
-ref_rural = bicspat_rural[names(bicspat_rural) == "fnom"]
-ref_urb = bicspat_urb[names(bicspat_urb) == "fnom"]
-bicspat_rural = round(bicspat_rural - ref_rural,2)
-bicspat_urb = round(bicspat_urb - ref_urb, 2) 
+#there are 4 nonspatial models which require rel.tol = 1e-16 instead of the default...this doesn't make sense to me, but we don't really need the nonspat...need to discuss w amy 
+#load("chtc_outputs/output_modselection/bicnospat.txt")
+#load("chtc_outputs/output_modselection/bicnospatr.txt")
 
-tablex_urb = data.frame("Migration term included" = c(rep(TRUE, 5), rep(FALSE, 5)), 
-                    "Degrees of freedom" = rep(c(1,2,3,4,5), 2),
-                    "Urban BIC" = c(bicspat_urb[1], bicspat_urb[3], bicspat_urb[5], bicspat_urb[7], bicspat_urb[9],
-                             "REFERENCE", bicspat_urb[4], bicspat_urb[6], bicspat_urb[8], bicspat_urb[10]))
-tablex_rural = data.frame("Migration term included" = c(rep(TRUE, 5), rep(FALSE, 5)), 
-                    "Degrees of freedom" = rep(c(1,2,3,4,5), 2),
-                    "Rural BIC" = c(bicspat_rural[1], bicspat_rural[3], bicspat_rural[5], bicspat_rural[7], bicspat_rural[9],
-                              "REFERENCE", bicspat_rural[4], bicspat_rural[6], bicspat_rural[8], bicspat_rural[10]))
-tablex = cbind(tablex_urb, Rural.BIC = tablex_rural$Rural.BIC)
+bicspattot = rbind(bicspat, bicspatr)
 
-library(gt)
-gt::gt(tablex) |> tab_style(style = list(cell_fill(color = "palegreen3"), #green because urb and rural are the same 
-                                      cell_text(weight = "bold")),
-                            locations = cells_body(rows = (Rural.BIC == min(as.numeric(Rural.BIC), na.rm = TRUE)))) |>
-  tab_style(style = list(cell_fill(color = "palegreen3"), 
-                                      cell_text(weight = "bold")),
-                            locations = cells_body(rows = (Urban.BIC == min(as.numeric(Urban.BIC), na.rm = TRUE)))) |>
-  tab_style(style = list(cell_fill(color = "lightgrey"),
-                         cell_text(weight = "bold")),
-                         locations = cells_body(rows = (Rural.BIC == "REFERENCE"))) |>
-  cols_label(Migration.term.included = "Migration included", Degrees.of.freedom="DF", Rural.BIC = "Rural BIC", Urban.BIC = "Urban BIC") |>
-  tab_header(title = "Models accounting for spatial error")
+bicref = bicspattot - bicspattot["bicspat", "fnom"] #this is the reference value which has no migterm, no rurality 
+
+bictable = data.frame("DF" = rep(c(1,2,3,4,5),4),
+                      "Including Migration" = c(rep(TRUE, 10), rep(FALSE, 10)),
+                      "Including Rurality" = c(rep(TRUE, 5), rep(FALSE, 5), rep(TRUE, 5), rep(FALSE,5)),
+                      "Change in BIC" = c(bicref["bicspatr", "fm"],
+                                          bicref["bicspatr", "fff2"],
+                                          bicref["bicspatr", "fff3"],
+                                          bicref["bicspatr", "fff4"],
+                                          bicref["bicspatr", "fff5"],
+                                          bicref["bicspat", "fm"],
+                                          bicref["bicspat", "fff2"],
+                                          bicref["bicspat", "fff3"],
+                                          bicref["bicspat", "fff4"],
+                                          bicref["bicspat", "fff5"],
+                                          bicref["bicspatr", "fnom"],
+                                          bicref["bicspatr", "fff2_nomig"],
+                                          bicref["bicspatr", "fff3_nomig"],
+                                          bicref["bicspatr", "fff4_nomig"],
+                                          bicref["bicspatr", "fff5_nomig"],
+                                          bicref["bicspat", "fnom"],
+                                          bicref["bicspat", "fff2_nomig"],
+                                          bicref["bicspat", "fff3_nomig"],
+                                          bicref["bicspat", "fff4_nomig"],
+                                          bicref["bicspat", "fff5_nomig"]))
+ggplot(data=bictable, aes(y = Change.in.BIC, color = Including.Migration, shape = Including.Rurality, x = DF)) + geom_point()
 ```
 
 Finally to determine whether taking into account unmeasured factors in county-to-county migration flows improves our ability to explain county-level health outcomes (Hypothesis 3), we added parameters $k_{ij}$ and $l_i$ to the premature mortality rate of each origin $j$ and each destination $i$ within our equation for the migration term. We call this new simulated migration term $smig_{it}$. The equation for $smig_{it}$ is shown below. We use $smig_{it}$ to simulate within-county selection for migration: when the parameter $k_{ij}$ is subtracted (ie decreased mortality rate), we simulate migration by individuals who are healthier than the average of their origin $j$. When the parameter $k_{ij}$ is added (ie increased mortality rate), we simulate migration by individuals who are unhealthier than the average of their origin $j$. Likewise, when the parameter $l_i$ is subtracted (ie decreased mortality rate), we simulate migration by individuals who are healthier than the average of their destination $i$. When the parameter $l_i$ is added (ie increased mortality rate), we simulate migration by individuals who are unhealthier than the average of their origin $i$. We specify that $k_{ij}$ depends on both origin $j$ and destination $i$ since health related selection for migration is connected to both the origins and the destinations of counties; meanwhile $l_i$ is dependent only upon the health of destination $i$. The value of $d_{i,j}$ can be thought of as a modeling term to explain health-related selection bias. <!--# amy's phrasing: "refer to the dij as a modeling term that models health related selection bias" --> $$  smig_{it}(k_{ij}, l_i) = \frac{ \sum_{j\ne i} out_{jit} ( y_{j,t-1} + k_{ij}) + (y_{i,t-1} + l_i) (pop_{i, t-1} - \sum_{j\ne i} out_{ijt})}{ \sum_{j\ne i} out_{jit} + (pop_{i,t-1} - \sum_{j\ne i} out_{ijt})} $$
