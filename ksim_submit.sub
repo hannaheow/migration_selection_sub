@@ -8,14 +8,14 @@ universe = container
 requirements = haschtcstaging == TRUE && OpSysMajorVer > 7
  #remove the && OpsSysMajorVer >7 if running non interactive 
 
-executable =/home/holsonwillia/migration_selection/noninteractive.sh
+executable =/home/holsonwillia/migration_selection_sub/noninteractive.sh
 transfer_executable = true
 
 arguments = $(var_i) $(var_j) $(var_k) $(var_l) 
 
 
 # Tell HTCondor to transfer the my-container.sif file to each job
-transfer_input_files =/home/holsonwillia/migration_selection/ksim_scriptforchtc.R, /home/holsonwillia/migration_selection/data_processed/queenw.Rdata,  /home/holsonwillia/migration_selection/data_processed/imputed_for_ksim.Rdata, /home/holsonwillia/migration_selection/data_raw/nchs_urbanicity_wlabels.sas7bdat
+transfer_input_files =/home/holsonwillia/migration_selection_sub/ksim_scriptforchtc_withreltol.R, /home/holsonwillia/migration_selection_sub/data_processed/queenw.Rdata,  /home/holsonwillia/migration_selection/data_processed/imputed_for_ksim.Rdata, /home/holsonwillia/migration_selection_sub/data_raw/nchs_urbanicity_wlabels.sas7bdat
 
 log = job_$(cluster).log
 error = job_$(cluster)_$(process)_$(var_i)_$(var_j)_$(var_k)_$(var_l).err
@@ -34,4 +34,4 @@ request_disk = 4GB
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 
-queue var_i, var_j, var_k, var_l from /home/holsonwillia/migration_selection/data_processed/loopvals2.txt
+queue var_i, var_j, var_k, var_l from /home/holsonwillia/migration_selection_sub/data_processed/loopvals.txt

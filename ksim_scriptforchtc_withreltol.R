@@ -128,7 +128,7 @@ converged <- FALSE
 
 # Loop to decrease rel.tol by a factor of 10 until convergence
 while (!converged) {
-model = tryreltol(current.rel.tol) 
+model = tryreltol(current_rel.tol) 
 if(!is.null(model)) {
 
 converged = TRUE
@@ -144,19 +144,19 @@ break
 
 if (converged) {
 bicspat = BICsplm(model) 
-bickij_int = data.frame(kur = unique(cpij$kur),
-kru = unique(cpij$kru),
-kuu = unique(cpij$kuu),
-krr = unique(cpij$krr),
-bicspat = bicspat, 
-rel.tol = current_rel.tol)
+bickij_int = data.frame(kur = unique(cpij$kur), 
+	kru = unique(cpij$kru), 
+	kuu = unique(cpij$kuu), 
+	krr = unique(cpij$krr),
+	bicspat = bicspat, 
+	rel.tol = current_rel.tol)
   
-  save(bickij_int, file = paste0("ksim", bickij_int$kur, "_",bickij_int$kru,"_", bickij_int$kuu, "_",bickij_int$krr, ".txt"))
+  save(bickij_int, file = paste0("bick", bickij_int$kur, "_",bickij_int$kru,"_", bickij_int$kuu, "_",bickij_int$krr, ".txt"))
   
 
 } else {
 
-error = function(e){cat("ERROR :", conditionMessage(e))}) #this will just go to the .out file 
+error = function(e){cat("ERROR :", conditionMessage(e))} #this will just go to the .out file 
 }
 
 
