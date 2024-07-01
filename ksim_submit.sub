@@ -1,0 +1,37 @@
+# apptainer.sub
+
+# Provide HTCondor with the name of your .sif file and universe information
+# (`universe = container` is optional as long as `container_image` is specified)
+
+container_image = file:///staging/holsonwillia/my-fourth-container.sif
+universe = container
+requirements = haschtcstaging == TRUE && OpSysMajorVer > 7
+ #remove the && OpsSysMajorVer >7 if running non interactive 
+
+executable =/home/holsonwillia/migration_selection_sub/noninteractive.sh
+transfer_executable = true
+
+arguments = $(var_i) $(var_j) $(var_k) $(var_l) 
+
+
+# Tell HTCondor to transfer the my-container.sif file to each job
+transfer_input_files =/home/holsonwillia/migration_selection_sub/ksim_scriptforchtc_withreltol.R, /home/holsonwillia/migration_selection_sub/data_processed/queenw.Rdata,  /home/holsonwillia/migration_selection/data_processed/imputed_for_ksim.Rdata, /home/holsonwillia/migration_selection_sub/data_raw/nchs_urbanicity_wlabels.sas7bdat
+
+log = job_$(cluster).log
+error = job_$(cluster)_$(process)_$(var_i)_$(var_j)_$(var_k)_$(var_l).err
+output = job_$(cluster)_$(process)_$(var_i)_$(var_j)_$(var_k)_$(var_l).out
+
+# Make sure you request enough disk for the container image in addition to your other input files
+request_cpus = 4
+request_memory = 25GB
+request_disk = 4GB      
+
+# Bind mount the host directory to the container directory
+# +SingularityBind = "/home/holsonwillia/migration_selection:/mnt"
+
+
+# for transfering output files 
+should_transfer_files = YES
+when_to_transfer_output = ON_EXIT
+
+queue var_i, var_j, var_k, var_l from /home/holsonwillia/migration_selection_sub/data_processed/loopvals.txt
