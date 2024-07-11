@@ -8,7 +8,7 @@ library(splm)
 library(plm)
 
 # get data 
-load("migterm_imp.Rdata")
+load("migterm_imp.RData")
 
 # add geography for use on spatial stuff 
 cp = tidycensus::get_acs(geography = "county", year = 2019, variables = c(tpop = "B01003_001"), survey = "acs5", output = "wide", geometry = TRUE)

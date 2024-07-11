@@ -9,15 +9,15 @@ requirements = (HasCHTCStaging == true)
 # && OpSysMajorVer > 7
  #remove the && OpsSysMajorVer >7 if running non interactive
 
-#executable =/home/holsonwillia/migration_selection/noninteractive.sh
-executable = /home/holsonwillia/migration_selection/noninteractive_modselection.sh
+#executable =/home/holsonwillia/migration_selection_sub/noninteractive.sh
+executable = /home/holsonwillia/migration_selection_sub/noninteractive_modselection.sh
 transfer_executable = true
 
 #arguments = $(var_i) $(var_j) $(var_k) $(var_l)
 
 
 # Tell HTCondor to transfer the my-container.sif file to each job
-transfer_input_files = /home/holsonwillia/migration_selection/spatial_mod_selection_with_urb_corrected.R, /home/holsonwillia/migration_selection/data_processed/queenw.Rdata, /home/holsonwillia/migration_selection/data_processed/migterm_imp.Rdata
+transfer_input_files = /home/holsonwillia/migration_selection_sub/spatial_mod_selection_with_urb_natality.R, /home/holsonwillia/migration_selection_sub/data_processed/queenw.Rdata, /home/holsonwillia/migration_selection_sub/data_processed/migterm_imp.RData
 
 log = job_$(cluster).log
 error = job_$(cluster)_$(process).err

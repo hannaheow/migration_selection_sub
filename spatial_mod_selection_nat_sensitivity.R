@@ -8,7 +8,7 @@ library(splm)
 library(plm)
 
 # get data 
-load("migterm_imp.Rdata")
+load("migterm_imp.RData")
 
 natsub = migterm_imp %>% filter(!is.na(migterm_nat))
 #natsub$ft = as.factor(natsub$year)
