@@ -340,6 +340,12 @@ ggplot(data = tf, aes(x = `Degrees of Freedom`,
 
 Finally, we simulated health-related selection for migration using $d_{ij}$, a modeling term used to measure the difference between the average health of an origin county and the average health of a destination county.
 
+```{r ksim without urb, just k, echo = FALSE}
+load("data_processed/bick_nourb_tot.Rdata")
+
+
+```
+
 We found that the model with the lowest BIC score occurred when there was no health-related selection bias related to urbanicity. Interestingly, this suggests that when moving from counties that are similar, health-related selection is not at play. Even when moving from counties that differ in urbanicity, health does not appear to be a factor in deciding who migrates and who does not. This is somewhat counter to what the literature says about health and migration. Typically migrants are healthier on average than the general population. <!--# cite --> But it is important to consider relative to whom. In our models, we have found that migrants with rural destinations are no more or less healthy than others within their urban origin counties - this could indicate that older (less healthy) individuals tend to move to rural places from urban places. Meanwhile, we found that migrants with urban destinations tend to be slightly less healthy than others within their rural origin counties - this could indicate that people migrate to cities seeking resources which could be tied to health CITE. Interestingly, when we isolate the effects of rural-urban migration and urban-rural migration on BIC score separately, we see that trends in BIC score are primarily driven by rural-urban migration; there does not appear to be a strong relationship between BIC score and the difference in premature mortality rate of urban origin and rural destination counties, but there does appear to be a strong relationship between BIC score and the difference in premature mortality rate of rural origin and urban destination counties.
 
 ```{r lotsa plots to see if there are any trends }
