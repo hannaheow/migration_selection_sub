@@ -3,6 +3,7 @@
 # Provide HTCondor with the name of your .sif file and universe information
 # (`universe = container` is optional as long as `container_image` is specified)
 
+
 container_image = file:///staging/holsonwillia/my-fourth-container.sif
 universe = container
 requirements = haschtcstaging == TRUE && OpSysMajorVer > 7
@@ -15,7 +16,7 @@ arguments = $(var_i) $(var_j) $(var_k) $(var_l)
 
 
 # Tell HTCondor to transfer the my-container.sif file to each job
-transfer_input_files =/home/holsonwillia/migration_selection_sub/ksim_nourb.R, /home/holsonwillia/migration_selection_sub/data_processed/queenw.Rdata,  /home/holsonwillia/migration_selection/data_processed/imputed_for_ksim.Rdata, /home/holsonwillia/migration_selection_sub/data_raw/nchs_urbanicity_wlabels.sas7bdat
+transfer_input_files =/home/holsonwillia/migration_selection_sub/ksim_nourb.R, /home/holsonwillia/migration_selection_sub/data_processed/queenw.Rdata,  /home/holsonwillia/migration_selection_sub/data_processed/imputed_for_ksim.RData, /home/holsonwillia/migration_selection_sub/data_raw/nchs_urbanicity_wlabels.sas7bdat
 
 log = job_$(cluster).log
 error = job_$(cluster)_$(process)_$(var_i).err
