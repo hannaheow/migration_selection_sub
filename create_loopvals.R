@@ -3,13 +3,13 @@
 # kl = ki
 # kk = ki
 
-ki = seq(-50, 50, by = 10)
+ki = seq(-40, 40, by = 10)
 kj = ki
 kl = ki
 kk = ki 
 
 
-testcon = file("loopvals_restrict.txt", open = "a")
+testcon = file("data_processed/loopvals_restrict.txt", open = "a")
 isOpen(testcon)
 
 
