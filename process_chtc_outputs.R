@@ -24,3 +24,21 @@ load("chtc_outputs/output_bic_reltol/bicnospatr.txt")
 load("chtc_outputs/output_bic_reltol/bicspatr.txt")
 
 bicms = rbind(bicnospat, bicnospatr, bicspat, bicspatr)
+
+
+#########################################################
+# process bic output from ksim_nourb.R 
+
+files = list.files("chtc_outputs/bick_nourb")
+
+bick_nourb_tot = data.frame()
+
+for (i in 1:length(files)){
+  load(paste0("chtc_outputs/bick_nourb/",files[i]))
+  #tempdat = bick_nourb
+  bick_nourb_tot = rbind(bick_nourb_tot, tempdat)
+}
+
+save(bick_nourb_tot, file= "data_processed/bick_nourb_tot.Rdata")
+
+

@@ -12,7 +12,7 @@ requirements = haschtcstaging == TRUE && OpSysMajorVer > 7
 executable =/home/holsonwillia/migration_selection_sub/noninteractive.sh
 transfer_executable = true
 
-arguments = $(var_i) $(var_j) $(var_k) $(var_l) 
+arguments = $(var_i) 
 
 
 # Tell HTCondor to transfer the my-container.sif file to each job

@@ -2,7 +2,7 @@
 
 #at top of script: 
 args <- commandArgs(trailingOnly = TRUE)
-i <- args[1]
+i <- as.numeric(args[1])
 # j <- args[2]
 # k <- args[3]
 # l <- args[4]
@@ -117,7 +117,7 @@ return(spat_fff4)
 
 
 # Initial rel.tol value
-initial_rel.tol <- 1e-10
+initial_rel.tol <- 1e-5
 current_rel.tol <- initial_rel.tol
 converged <- FALSE
 
