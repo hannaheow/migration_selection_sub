@@ -1,6 +1,6 @@
 #!/bin/bash
 
-Rscript ksim_submit.R $@ 
+Rscript ksim_scriptforchtc_withreltol.R $@ 
 echo "listing files in current wd" 
 ls -R 
 echo "looking for bickij_int" 
