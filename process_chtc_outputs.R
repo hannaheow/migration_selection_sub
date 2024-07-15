@@ -35,10 +35,25 @@ bick_nourb_tot = data.frame()
 
 for (i in 1:length(files)){
   load(paste0("chtc_outputs/bick_nourb/",files[i]))
-  #tempdat = bick_nourb
+  tempdat = bick_nourb
   bick_nourb_tot = rbind(bick_nourb_tot, tempdat)
 }
 
 save(bick_nourb_tot, file= "data_processed/bick_nourb_tot.Rdata")
 
 
+
+#########################################################
+# process bic output from output_bick_restrict
+
+files = list.files("chtc_outputs/output_bick_restrict")
+
+bick_restrict = data.frame()
+
+for (i in 1:length(files)){
+  load(paste0("chtc_outputs/output_bick_restrict/",files[i]))
+  tempdat = bickij_int
+  bick_restrict = rbind(bick_restrict, tempdat)
+}
+
+save(bick_restrict, file= "data_processed/bick_restrict.Rdata")

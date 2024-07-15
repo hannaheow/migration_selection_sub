@@ -25,3 +25,31 @@ for(i in 1:length(ki)) {
 close(testcon)
 
 
+
+
+#####################################################################################
+#####################################################################################
+# for investigating the k vals that did not run in bick_restrict 
+
+load("data_processed/bick_restrict.Rdata")
+
+
+# Define the sequence
+values <- seq(-40, 40, by=10)
+
+# Generate all possible combinations
+all_combinations <- expand.grid(kur = values, kru = values, kuu = values, krr = values)
+
+bick_restrict = bick_restrict %>% mutate(kur = as.numeric(kur),
+                                         kru = as.numeric(kru), 
+                                         kuu = as.numeric(kuu),
+                                         krr = as.numeric(krr))
+
+
+# Check for missing combinations
+missing_combinations <- anti_join(all_combinations, bick_restrict, by = c("kur", "kru", "kuu", "krr"))
+
+write.table(missing_combinations, file = "data_processed/missingcombos.txt", 
+          row.names = FALSE, col.names = FALSE, sep = ", ",
+          quote = FALSE)
+

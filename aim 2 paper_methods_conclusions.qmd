@@ -15,17 +15,17 @@ bibliography: references.bib
 
 <!--#  need sensitivity analysis with natality before adding urb; so basically 1) add mig; 2) add natality; 3) decide about natality; 3) add urb  -->
 
-### [Approach and Results]{.underline}
+### [Approach]{.underline}
 
 We test the following hypotheses:
 
-1.  County-to-county migration flows improve the explainability of spatiotemporal models of county-level health outcomes. <!--# 2. The total number of years that a county has had positive net migration or negative net migration improves the explainability of autoregressive models of county-level mortality. -->
+1.  County-to-county migration flows improve the explainability of spatiotemporal models of county-level health outcomes.
 
 2.  County-to-county migration flows improve the explainability of spatiotemporal models of county-level health outcomes, even after accounting for rurality.
 
 3.  Taking into account unmeasured factors in county-to-county migration flows improves our ability to explain county-level health outcomes as well as the differential role that migration plays in urban versus rural counties.
 
-Considering the exploratory nature of these hypotheses, we first establish a baseline model which is similar to autoregressive county-level mortality models used in the past [@yang2012]. In our baseline model, we include yearly mortality rates as a function of time (treated categorically) and premature mortality rates lagged by one year. We included random intercepts for each destination county to account for variation between counties, as recommended by Greenland and Morgenstern's assessment of best practices for ecological studies [@greenland1989]. We tested splines with two to five degrees of freedom to account for potential nonlinearity in mortality rates. For a given urbanicity subgroup, the baseline model (without splines) is shown below:
+Considering the exploratory nature of these hypotheses, we first establish a baseline model which is similar to autoregressive county-level mortality models used in the past [@yang2012]. This baseline model includes yearly mortality rates as a function of time (treated categorically) and premature mortality rates lagged by one year. Random intercepts for each destination county are included to account for variation between counties, following best practies for ecological studies[@greenland1989]. We tested splines with two to five degrees of freedom to account for potential nonlinearity in mortality rates. The baseline model (without splines) is shown below:
 
 $$  y_{it} = \beta_0 + \beta_{1}t_{13i} + \beta_{2}t_{14i} + \beta_{3}t_{15i}  + \beta_{4}t_{16i} + \beta_{5}t_{17i} + \beta_{6}t_{18i} + \beta_{7}t_{19i} + \beta_{8} y_{t-1,i} + \upsilon_{i}t + \mu_{i} + \epsilon_{it}    $$
 
@@ -40,13 +40,10 @@ $\mu_{i}$ is a random intercept for each destination county $i$.
 $\epsilon_{it}$ represents an error term for each destination county $i$ at year $t$.
 
 \
-<!--# $\upsilon_{i}$ is a random slope for the effect of time $t$ on each county $i$. -->
 
-<!--# when i switched to the splm package, random slope now needs to be specified like: formula = rate_d1 ~ ft + rate_d0 + ft:random1; i will need to rerun.... need to talk to amy about how important this might be; skipping for now -->
+We began with our baseline model and iteratively added splines for the prior year's average county-level premature mortality rate and the migration term to capture potential nonlinear trends. To determine the best fitting model, we analyzed several models using the Bayesian Information Criterion (BIC), which is commonly used to identify models with the greatest explanatory power \[\@kuha2004\]. We observed that keeping the degrees of freedom equal for the splines of both the migration term and the premature mortality rate resulted in lower BIC scores, indicating better model fit. All models accounted for both spatial and random error and were created using the `splm` and `splines` R packages \[\@splines\]\[\@millo2023\].
 
-<!--# need to confirm no interactions between netmig, migterm, and autoreg -->
-
-To determine whether county-to-county migration flows improve the explainability of spatiotemporal models of county-level health outcomes (Hypothesis 1), we compare the baseline model to models that account for migration. To quantify migration, we develop a novel "migration term" which accounts for the mortality rates of individuals who have moved to a county of interest during a given period, essentially a weighted average of the mortality rates of all the origin counties. We calculated the following for each change in year and for each destination county $i$:
+To determine whether county-to-county migration flows improve the explainability of spatiotemporal models of county-level health outcomes (Hypothesis 1), we compared the baseline model to models that account for migration. To quantify migration, we developed a novel "migration term" which accounts for the mortality rates of individuals who have moved to a county of interest during a given period. This term is essentially a weighted average of the mortality rates of all the origin counties. We calculated the following for each change in year and for each destination county $i$:
 
 $$  mig_{it} = \frac{ \sum_{j\ne i} out_{jit} y_{j,t-1} + y_{i,t-1} (pop_{i, t-1} - \sum_{j\ne i} out_{ijt})}{ \sum_{j\ne i} out_{jit} + (pop_{i,t-1} - \sum_{j\ne i} out_{ijt})} $$
 
@@ -56,15 +53,15 @@ $y_{it}$ was defined above\
 $out_{ijt}$ represents the number of migrants from a unique origin county $j$ who migrated to a destination county $i$ between year $t-1$ and year $t$.\
 $pop_{i, t-1}$ is the population of an unique destination county $i$ at initial year $t-1$\
 
-<!--# this isn't a good table; prob need a better way to visualize "table 1" temporally  -->
-
-Below is a table showing median $y_{it}$ as well as median number of in migrants and out migrants by year and by county type for each US county. <!--# probably need to be clearer here that the "rate" is the premature mort rate and not the rate of migration. also maybe should consider switching raw in/out mig vals to per capita rates   -->
+The table below presents descriptive statistics for $y_{it}$​ (premature age-adjusted mortality rate) and migration rates, categorized by year and county type. Note that migration rates for the year 2011 are not included. This is because the migration-flow data starts from 2011 to 2012, and these values are shown in the 2012 section of the table, corresponding with the 2012 premature age-adjusted mortality rates.
 
 ```{r table1 as dreamed up by chatgpt }
 
 # probably need to find a way to add units to this somehow 
 
-migterm_imp$migrat = as.numeric(migterm_imp$totin_d)/as.numeric(migterm_imp$pop_d0)
+load("data_processed/migterm_imp.Rdata")
+
+migterm_imp$migrat = as.numeric(migterm_imp$totin_d)/as.numeric(migterm_imp$pop_d0)*1000
 
 migterm_imp = migterm_imp %>% 
    mutate(
@@ -74,132 +71,51 @@ migterm_imp = migterm_imp %>%
 # Define labels for the table
 table1::label(migterm_imp$destid) = "County"
 table1::label(migterm_imp$year) = "Year"
-table1::label(migterm_imp$migrat) = "Migration Rate"
-table1::label(migterm_imp$rate_d1) = "Mortality Rate"
+table1::label(migterm_imp$migrat) = "Migration rate"
+table1::label(migterm_imp$rate_d1) = "Premature age-adjusted mortality rate"
 table1::label(migterm_imp$rural) = "Urban/Rural"
 
-table1::table1( ~ migrat + rate_d1 | year + rural, data = migterm_imp, units = units)
+# Define units for the columns
+table1::units(migterm_imp$migrat) <- "per 1,000"
+table1::units(migterm_imp$rate_d1) <- "per 100,000"
 
+# Filter data for rural
+rural_data <- migterm_imp %>% filter(rural == "Rural")
 
+# Filter data for urban
+urban_data <- migterm_imp %>% filter(rural == "Urban")
 
+# Generate the table for rural with title
+table_rural <- table1::table1(~ migrat + rate_d1 | year, 
+                              data = rural_data, 
+                              overall = "Total", 
+                              title = "Table 1: Rural Counties",
+                              caption = "Migration Rate and Mortality Rate stratified by Year for Rural Counties")
 
+# Generate the table for urban with title
+table_urban <- table1::table1(~ migrat + rate_d1 | year, 
+                              data = urban_data, 
+                              overall = "Total", 
+                              title = "Table 2: Urban Counties",
+                              caption = "Migration Rate and Mortality Rate stratified by Year for Urban Counties")
 
-# Adding summary statistics for overall
-# summary_overall <- migterm_imp %>%
-#   summarise(
-#     n_counties = n_distinct(destid),
-#     n_obs = n(),
-#     migration_mean = mean(migrat, na.rm = TRUE),
-#     migration_sd = sd(migrat, na.rm = TRUE),
-#     mortality_mean = mean(rate_d1, na.rm = TRUE),
-#     mortality_sd = sd(rate_d1, na.rm = TRUE)
-#   )
-# 
-# summary_overall_table <- table1::table1(~ migration_mean + migration_sd + mortality_mean + mortality_sd, data = summary_overall, overall = "Overall", units = units)
-
+# Display the tables
+table_rural
+table_urban
 
 ```
 
-```{r table1 by year, echo = FALSE, warning = FALSE, message = FALSE, include = FALSE}
-
-# not currently in use, probably should be deleted 
-
-#table1::table1(~totin_d + totout_d + rate_d0 | rural*year, data = migterm_imp)
-
-
-load("data_processed/migterm_imp.RData")
-
-
-library(tidyverse)
-library(splines)
-library(splm)
-
-# add geography for use on spatial stuff 
-cp = tidycensus::get_acs(geography = "county", year = 2019, variables = c(tpop = "B01003_001"), survey = "acs5", output = "wide", geometry = TRUE)
-
-cpmig = merge(cp, migterm_imp, by.x = "GEOID", by.y = "destid", all.y = TRUE)
-
-
-# cpmig = cpmig %>% 
-#  arrange(year) %>% 
-#  group_by(GEOID) %>% 
-#  mutate(t = row_number())
-# 
-# cpmig$ft = as.factor(cpmig$t)
-
-# these are the steps for wrangling all contiguous US states, not just a subset 
-
-cpall = cpmig %>% select(rate_d1, rate_d0, migterm, GEOID, geometry, year)
-
-# commented out because queenw was saved and can now be loaded directly from data_processed 
-# spall = cpall %>% select(GEOID, geometry) %>% distinct()
-# queen = spdep::poly2nb(spall, row.names = "GEOID", queen = T)
-# queenw = spdep::nb2listw(queen, style = "W", zero.policy = TRUE)
-
-cpall = plm::pdata.frame(cpall, index = c("GEOID", "year"))
-cpall$ft = as.factor(cpall$year)
-
-
-
-
-library(gt)
-
-
-
-all = migterm_imp %>% filter(year != 2011) %>% group_by(year) %>% rename(Year = year) %>% select(totin_d, totout_d, rate_d0, rural) %>% 
-  summarize(Overall_In = median(totin_d),
-               Overall_Out = median(totout_d), 
-              Overall_Rate = median(rate_d0), 
-               Rural_In = median(totin_d[rural == 1]),
-              Rural_Out = median(totout_d[rural == 1]),
-                Rural_Rate = median(rate_d0[rural == 1]),
-                 Urban_In = median(totin_d[rural == 0]),
-              Urban_Out = median(totout_d[rural == 0]),
-                Urban_Rate = median(rate_d0[rural == 0]) 
-              )
-
-all %>% gt(rowname_col = "year") %>% 
-  tab_spanner_delim(
-    delim = "_") %>% 
-  tab_style(
-    style = gt::cell_borders(
-      sides = "right",
-      weight = px(2)),
-    locations = cells_body(columns = c("Year", "Overall_Rate", "Rural_Rate")
-    )) %>% 
-  tab_caption(caption = "Median number of in migrants, median number of out migrants, and median age-adjusted premature mortality rate by year and county type")
-    
-
-
-
-
-# plotdat = migterm_imp %>% group_by(rural, year) %>% 
-#   mutate(medianrate = median(rate_d1),
-#          medianmig = median(migterm),
-#          rural = as.factor(rural)) %>% 
-#   select("year", "medianmig", "medianrate", "rural") %>% 
-#   pivot_longer(-c(year,rural), names_to = "var", values_to = "value")
-# 
-# ggplot(data = plotdat, aes(x = year, y = value, group = interaction(rural, var), color = as.factor(var), shape = rural)) + geom_line() + geom_point() + 
-#   labs(color = "", shape = "") + xlab("") + ylab("Age-adjusted premature deaths per 100,000 population") + 
-#   scale_color_manual(labels = c("Median weighted average migration term", "Median age-adjusted premature mortality rate"), values = c("darkblue", "darkred")) + 
-#   scale_shape_manual(labels = c("Urban", "Rural"), values = c(1, 0)) +
-#   theme_minimal()
-```
-
-Our weighted-average approach implicitly accounts for between-county selection for migration, but does not account for within-county selection of migrants. In other words, our best guess for the mortality rate of migrants is exactly the mortality rate of their original county; meanwhile, some counties are more likely to be destinations for migration than others.
-
-We analyzed several models and used the Bayesian Information Criterion (BIC) to determine the best fitting model. BIC is commonly used to determine models with greatest explanatory power [@kuha2004]. Starting with our baseline model, we iteratively added splines for the prior year's average county-level premature mortality rate and the migration term, capturing potential nonlinear trends. We chose to keep the number of degrees of freedom equal for splines for the migration term and premature mortality rate since we noticed that imbalanced degrees of freedom tended to produce higher BIC scores. <!--# need to add potential explanation here maybe?? -->All models accounted for both spatial error and random error and were created using the splm and and splines R packages [@splines][@millo2023].
-
-<!--# Because we know county-level health to be related to county-level natality, and because our outcome variable (premature age-adjusted mortality) may not capture the health of young people in counties, we conducted a sensitivity analysis of the effect of natality on the effect of our migration term. We analyzed the the effect and explainability of our migration term using a subset of counties for which birth data was publicly available via CDC WONDER. We determined that natality does not change the effect or explainability of the migration term and therefore does not need to be included in our models. need table in appendix showing this -->
+Our weighted-average approach implicitly accounts for between-county selection for migration but does not account for within-county selection of migrants. In other words, our best guess for the mortality rate of migrants is exactly the mortality rate of their original county; meanwhile, some counties are more likely to be destinations for migration than others.
 
 To determine whether the role that county-to-county migration flows play in county-level health outcomes differs significantly between rural and urban counties (Hypothesis 2), we added a factor term for urbanicity including interaction terms between urbanicity and $y_{i,t-1}$ and urbanicity and $mig_{i,t}$ to the models accounting for spatial error used to test Hypothesis 1. We again compared these models using BIC while iteratively adding splines with equal degrees of freedom for migration and lagged premature mortality.
 
-In order to maximize the number of counties per category, we chose to use only two urbanization categorizations: urban and rural, where urban includes large central metro, medium metro, and small metro counties <!--# i verified this using cococino county as a check - these definitions are also outlined and cited in the data section --> and rural includes micropolitan and noncore counties. We assessed `r length(unique(migterm_imp$destid[migterm_imp$rural == 1]))` unique rural counties and `r length(unique(migterm_imp$destid[migterm_imp$rural == 0]))` unique urban counties. Again, we utilized the same steps outlined above to determine which model had the most explanatory power and lowest BIC score.
+To maximize the number of counties per category, we chose to use only two urbanization categorizations: urban and rural, where urban includes large central metro, medium metro, and small metro counties, and rural includes micropolitan and noncore counties. We assessed \`r length(unique(migterm_imp$destid[migterm_imp$rural == 1\])) \` unique rural counties and r length(unique(migterm_imp$destid[migterm_imp$rural == 0\])) unique urban counties. We utilized the same steps outlined above to determine which model had the most explanatory power and lowest BIC score.
 
-Finally to determine whether taking into account unmeasured factors in county-to-county migration flows improves our ability to explain county-level health outcomes (Hypothesis 3), we added parameters $k_{ij}$ and $l_i$ to the premature mortality rate of each origin $j$ and each destination $i$ within our equation for the migration term. We call this new simulated migration term $smig_{it}$. The equation for $smig_{it}$ is shown below. $$  smig_{it}(k_{ij}, l_i) = \frac{ \sum_{j\ne i} out_{jit} ( y_{j,t-1} + k_{ij}) + (y_{i,t-1} + l_i) (pop_{i, t-1} - \sum_{j\ne i} out_{ijt})}{ \sum_{j\ne i} out_{jit} + (pop_{i,t-1} - \sum_{j\ne i} out_{ijt})} $$
+Finally, to determine whether taking into account unmeasured factors in county-to-county migration flows improves our ability to explain county-level health outcomes (Hypothesis 3), we added parameters $k_{ij}$ and $l_i$ to the premature mortality rate of each origin $j$ and each destination $i$ within our equation for the migration term. We call this new simulated migration term $smig_{it}$. The equation for $smig_{it}$ is shown below:
 
-We use $smig_{it}$ to simulate within-county selection for migration: when the parameter $k_{ij}$ is subtracted (ie decreased mortality rate), we simulate migration by individuals who are healthier than the average of their origin $j$. When the parameter $k_{ij}$ is added (ie increased mortality rate), we simulate migration by individuals who are unhealthier than the average of their origin $j$. Likewise, when the parameter $l_i$ is subtracted (ie decreased mortality rate), we simulate migration by individuals who are healthier than the average of their destination $i$. When the parameter $l_i$ is added (ie increased mortality rate), we simulate migration by individuals who are unhealthier than the average of their origin $i$. We specify that $k_{ij}$ depends on both origin $j$ and destination $i$ since health related selection for migration is connected to both the origins and the destinations of counties; meanwhile $l_i$ is dependent only upon the health of destination $i$.
+$$  smig_{it}(k_{ij}, l_i) = \frac{ \sum_{j\ne i} out_{jit} ( y_{j,t-1} + k_{ij}) + (y_{i,t-1} + l_i) (pop_{i, t-1} - \sum_{j\ne i} out_{ijt})}{ \sum_{j\ne i} out_{jit} + (pop_{i,t-1} - \sum_{j\ne i} out_{ijt})} $$
+
+We use $smig_{it}$ to simulate within-county selection for migration: when the parameter $k_{ij}$ is subtracted (ie decreased mortality rate), we simulate migration by individuals who are healthier than the average of their origin $j$. When the parameter $k_{ij}$ is added (ie increased mortality rate), we simulate migration by individuals who are unhealthier than the average of their origin $j$. Likewise, when the parameter $l_i$ is subtracted (ie decreased mortality rate), we simulate migration by individuals who are healthier than the average of their destination $i$. When the parameter $l_i$ is added (i.e., increased mortality rate), we simulate migration by individuals who are unhealthier than the average of their origin $i$. We specify that $k_{ij}$ depends on both origin $j$ and destination $i$ since health related selection for migration is connected to both the origins and the destinations of counties; meanwhile $l_i$ is dependent only upon the health of destination $i$.
 
 Since we are most interested in how the values of $k_{ij}$ and $l_i$ are related to each other, we chose to simplify $smig_{it}$ such that $l_i$ is held constant and only $k_{ij}$ fluctuates. Therefore, we assign the parameter $d_{ij}$ to be the difference between $k_{ij}$ and $l_i$, thus creating a new equation for $k_{ij}$ in terms of $l_i$ and $d_{ij}$ such that $k_{ij} = l_i+ d_{ij}$. The value of $d_{i,j}$ can be thought of as a modeling term to explain health-related selection bias. <!--# amy's phrasing: "refer to the dij as a modeling term that models health related selection bias" -->Then our equation for $smig_{it}(k_{ij})$ becomes:
 
@@ -207,13 +123,15 @@ $$  smig_{it}(l_i+d_{ij}, l_i) = \frac{ \sum_{j\ne i} out_{jit} ( y_{j,t-1} + l_
 
 which can be simplified into the following:
 
-$$  smig_{it}(d_{ij}) = \frac{ \sum_{j\ne i} out_{jit} ( y_{j,t-1} + d_{ij}) + y_{i,t-1} (pop_{i, t-1} - \sum_{j\ne i} out_{ijt})}{ \sum_{j\ne i} out_{jit} + (pop_{i,t-1} - \sum_{j\ne i} out_{ijt})} +l_i$$Therefore, using the equation above, we simulate health-related selection occurring as a result of the differences in health between the origin and the destination counties.
+$$  smig_{it}(d_{ij}) = \frac{ \sum_{j\ne i} out_{jit} ( y_{j,t-1} + d_{ij}) + y_{i,t-1} (pop_{i, t-1} - \sum_{j\ne i} out_{ijt})}{ \sum_{j\ne i} out_{jit} + (pop_{i,t-1} - \sum_{j\ne i} out_{ijt})} +l_i$$
+
+Therefore, using the equation above, we simulate health-related selection occurring as a result of the differences in health between the origin and the destination counties.
 
 To determine which values of $d_{ij}$ best explain trends in county-level premature mortality rates, we replace $mig_{it}$ with $smig_{it}(d_{ij})$ in the model with the most explanatory power as determined by our previous hypotheses.
 
-We then test potential values of $d_{ij}$ to determine which value produces the lowest BIC score. We incremented by 50 from -200 to 200 such that migrants had an estimated premature mortality rate that was between 200 premature deaths per 100,000 population higher or 200 premature deaths per 100,000 population higher lower than their destination county.
+We then test potential values of $d_{ij}$ to determine which value produces the lowest BIC score. We incremented by 50 from -200 to 200 such that migrants had an estimated premature mortality rate that was between 200 premature deaths per 100,000 population higher or 200 premature deaths per 100,000 population higher lower than their origin county.
 
-To understand this phenomenon further, we tested potential values of $d_{ij}$ when accounting for urbanicity such that potential values of $d_{ij}$ were dependent upon whether origins and destinations were rural or urban. Again, we incremented by 50 from -200 to 200 premature deaths per 100,000 higher than the destination county.
+To understand this phenomenon further, we conducted a grid search to test potential values of $d_{ij}$ when accounting for In a secondary simulation, we varied \$d\_{ij}\$ for each possible combination of origin and destination type. In other words, \$d\_{ij}\$ was different for each migration scenario: rural to rural, urban to rural, rural to urban, and urban to urban. urbanicity, where these values depended on whether origins and destinations were rural or urban. We started with a large increment of 50, ranging from -200 to 200 premature deaths per 100,000 higher than the destination county. To obtain more precise results, we then narrowed our increment to 10 and conducted the same analyses within a smaller range of -40 to 40 premature deaths per 100,000 higher than the destination county.
 
 <!--# present all results for transparency -->
 
@@ -247,17 +165,15 @@ ggplot(aes(x = as.numeric(kru), y = as.numeric(bicspat)), data = bicmin) +
 
 ```
 
-### [**Conclusions**]{.underline}
+### [**Results and Conclusions**]{.underline}
 
-To justify further investigation, first we determined that our migration term added explainability (as measured by low BIC score) to our most basic autoregressive model accounting for spatial error. The best fitting model in terms of BIC score included splines with four degrees of freedom for both the autoregressive term and our weighted average migration term. Thus, models accounting for migration had more explanatory power than models that included only the prior year's average county-level mortality rate.
+To justify further investigation, we first determined that our migration term added explainability (as measured by lower BIC scores) to our most basic autoregressive model accounting for spatial error. The best fitting model in terms of BIC score included splines with four degrees of freedom for both the autoregressive term and our weighted average migration term. This indicates that models incorporating migration had more explanatory power than models that included only the prior year's average county-level mortality rate.
 
-Then, to determine whether county-to-county migration flows improve the explainability of spatiotemporal models of county-level health outcomes, even after accounting for urbanicity, we added an interaction term between urbanicity and lagged premature mortality and urbanicity and migration. We found that after adjusting for urbanicity, the models with the lowest BIC scores included splines with four degrees of freedom each for the migration term and lagged age-adjusted mortality as well as the net migration term factor variable. Thus, even after accounting for urbanicity, the migration term added explainability to our models. <!--# table here with urbanicity model selection -->
+Next, we sought to determine whether our migration term would improve the explainability of our spatiotemporal model, even after accounting for urbanicity. We added interaction terms between urbanicity and lagged premature mortality and urbanicity and migration. After adjusting for urbanicity, we found that the models with the lowest BIC scores included splines with four degrees of freedom each for the migration term and lagged age-adjusted mortality. This further confirmed that the migration term added explainability to our models, even when accounting for urbanicity.
 
-The table below shows the model with the lowest BIC score (and largest change in BIC relative to the reference) in green. Additionally, in the plot below, we can see that BIC scores are lower when the migration term and urbanicity interaction are included.
+The plot below demonstrates lower BIC scores for models that include the migration term along with an interaction between $y_{it}$ and urbanicity. The difference in BIC scores between models that include the migration term and those that do not is more pronounced when an interaction term for urbanicity is added. This suggests that the migration term significantly enhances model explainability when accounting for urbanicity, indicating that the relationship between average county-level health and migration may differ substantially across urbanicity levels.
 
 ```{r spatial models only, echo = FALSE, warning = FALSE, message = FALSE}
-#BIC scores were generated in "spatial mod selection.R"   
-
 
 spatonly = read.delim("chtc_outputs/modselection_nat.txt", sep = ",")  
 ref = spatonly$BIC[spatonly$Model == "fnom"] 
@@ -289,22 +205,6 @@ tf$`BIC score relative to reference`[tf$`BIC score relative to reference` == 0] 
 
 
 tf = tf %>% arrange(`Degrees of Freedom`, `Migration Included`, `Urbanicity interaction`)
-
-library(gt)
-
-gt::gt(tf) |> tab_style(style = list(cell_fill(color = "palegreen3"), 
-                                         cell_text(weight = "bold")),   
-                            locations = cells_body(rows = (`BIC score relative to reference` == min(as.numeric(`BIC score relative to reference`), na.rm = TRUE)))) |>   
-  tab_style(style = list(cell_fill(color = "lightgrey"),                    
-                         cell_text(weight = "bold")),                     
-            locations = cells_body(rows = (`BIC score relative to reference` == 0))) |>   
-   tab_header(title = "Change in BIC relative to reference")   
-
-
-
-
-
-
 
 ggplot(data = tf, aes(x = `Degrees of Freedom`, 
                       y = as.numeric(`BIC score relative to reference`), 
@@ -338,15 +238,21 @@ ggplot(data = tf, aes(x = `Degrees of Freedom`,
 
 ```
 
-Finally, we simulated health-related selection for migration using $d_{ij}$, a modeling term used to measure the difference between the average health of an origin county and the average health of a destination county.
+Finally, we simulated health-related selection for migration using $d_{ij}$, a modeling term used to measure the difference between the average health of an origin county and the average health of a destination county. When our simulation did not account for the urbanicity of destination and origin counties, the model with the most explanatory power had $d_{ij} = 0$ . As the magnitude of the difference between the health of origin and destination increased, our models had less explanatory power and higher BIC scores. This is shown in the plot below.
 
 ```{r ksim without urb, just k, echo = FALSE}
 load("data_processed/bick_nourb_tot.Rdata")
 
-
+ggplot(data = bick_nourb_tot, aes(x = as.numeric(newk), y = as.numeric(bicspat))) +
+  geom_point() +
+  theme_bw() + 
+  labs(x = expression(d[ij]), 
+       y = "BIC score")
 ```
 
-We found that the model with the lowest BIC score occurred when there was no health-related selection bias related to urbanicity. Interestingly, this suggests that when moving from counties that are similar, health-related selection is not at play. Even when moving from counties that differ in urbanicity, health does not appear to be a factor in deciding who migrates and who does not. This is somewhat counter to what the literature says about health and migration. Typically migrants are healthier on average than the general population. <!--# cite --> But it is important to consider relative to whom. In our models, we have found that migrants with rural destinations are no more or less healthy than others within their urban origin counties - this could indicate that older (less healthy) individuals tend to move to rural places from urban places. Meanwhile, we found that migrants with urban destinations tend to be slightly less healthy than others within their rural origin counties - this could indicate that people migrate to cities seeking resources which could be tied to health CITE. Interestingly, when we isolate the effects of rural-urban migration and urban-rural migration on BIC score separately, we see that trends in BIC score are primarily driven by rural-urban migration; there does not appear to be a strong relationship between BIC score and the difference in premature mortality rate of urban origin and rural destination counties, but there does appear to be a strong relationship between BIC score and the difference in premature mortality rate of rural origin and urban destination counties.
+In a secondary simulation, we varied \$d\_{ij}\$ for each possible combination of origin and destination type. In other words, \$d\_{ij}\$ was different for each migration scenario: rural to rural, urban to rural, rural to urban, and urban to urban. We found no evidence of health-related selection for migration since the model with the lowest BIC score included $d_{ij} =0$ for every origin-destination pair.
+
+Even when moving from counties that differ in urbanicity, health does not appear to be a factor in deciding who migrates and who does not. This is somewhat counter to what the literature says about health and migration. Typically migrants are healthier on average than the general population. <!--# cite --> But it is important to consider relative to whom. In our models, we have found that migrants with rural destinations are no more or less healthy than others within their urban origin counties - this could indicate that older (less healthy) individuals tend to move to rural places from urban places. Meanwhile, we found that migrants with urban destinations tend to be slightly less healthy than others within their rural origin counties - this could indicate that people migrate to cities seeking resources which could be tied to health CITE. Interestingly, when we isolate the effects of rural-urban migration and urban-rural migration on BIC score separately, we see that trends in BIC score are primarily driven by rural-urban migration; there does not appear to be a strong relationship between BIC score and the difference in premature mortality rate of urban origin and rural destination counties, but there does appear to be a strong relationship between BIC score and the difference in premature mortality rate of rural origin and urban destination counties.
 
 ```{r lotsa plots to see if there are any trends }
 load("data_processed/bickdf.Rdata")
@@ -405,6 +311,28 @@ ggplot(aes(x = as.numeric(kru), y = as.numeric(bicspat), color = as.factor(color
     labels = c("0" = expression(d[ur] <= 0), 
                "1" = expression(d[ur] >0)))
 
+```
+
+```{r}
+load("data_processed/bick_restrict.Rdata")
+
+bicmin = bick_restrict %>% filter(kuu == 0 & krr == 0)
+bicmin$colorvar = ifelse(bicmin$kur >0, 1, 0)
+
+lattice::wireframe(bicspat ~ as.numeric(kur) * as.numeric(kru) , data = bicmin)
+
+
+ggplot(aes(x = as.numeric(kru), y = as.numeric(bicspat), color = as.factor(colorvar)), data = bicmin) +
+  geom_point() +
+  xlab("Difference in average premature mortality rate\n between urban origin counties and rural destination counties") +
+  ylab("BIC") +
+  theme_bw() +
+  labs(subtitle = expression(paste("Relationship between BIC and ", d[ij], "\n (assuming that ", d[rr], " = 0, and ", d[uu], " = 0)")),
+       title = "Urban-Rural Migration") +
+  scale_color_manual(
+    values = c("0" = "red", "1" = "blue"),
+    labels = c("0" = expression(d[rr] <= 0), 
+               "1" = expression(d[rr] >0)))
 ```
 
 ### Discussion and Limitations {.underline}

@@ -1,0 +1,164 @@
+---
+title: "trash"
+format: html
+editor: visual
+---
+
+```{r table1 by year, echo = FALSE, warning = FALSE, message = FALSE, include = FALSE}
+
+# not currently in use, probably should be deleted 
+
+#table1::table1(~totin_d + totout_d + rate_d0 | rural*year, data = migterm_imp)
+
+
+# load("data_processed/migterm_imp.RData")
+# 
+# 
+# library(tidyverse)
+# library(splines)
+# library(splm)
+# 
+# # add geography for use on spatial stuff 
+# cp = tidycensus::get_acs(geography = "county", year = 2019, variables = c(tpop = "B01003_001"), survey = "acs5", output = "wide", geometry = TRUE)
+# 
+# cpmig = merge(cp, migterm_imp, by.x = "GEOID", by.y = "destid", all.y = TRUE)
+# 
+# 
+# # cpmig = cpmig %>% 
+# #  arrange(year) %>% 
+# #  group_by(GEOID) %>% 
+# #  mutate(t = row_number())
+# # 
+# # cpmig$ft = as.factor(cpmig$t)
+# 
+# # these are the steps for wrangling all contiguous US states, not just a subset 
+# 
+# cpall = cpmig %>% select(rate_d1, rate_d0, migterm, GEOID, geometry, year)
+# 
+# # commented out because queenw was saved and can now be loaded directly from data_processed 
+# # spall = cpall %>% select(GEOID, geometry) %>% distinct()
+# # queen = spdep::poly2nb(spall, row.names = "GEOID", queen = T)
+# # queenw = spdep::nb2listw(queen, style = "W", zero.policy = TRUE)
+# 
+# cpall = plm::pdata.frame(cpall, index = c("GEOID", "year"))
+# cpall$ft = as.factor(cpall$year)
+# 
+# 
+# 
+# 
+# library(gt)
+# 
+# 
+# 
+# all = migterm_imp %>% filter(year != 2011) %>% group_by(year) %>% rename(Year = year) %>% select(totin_d, totout_d, rate_d0, rural) %>% 
+#   summarize(Overall_In = median(totin_d),
+#                Overall_Out = median(totout_d), 
+#               Overall_Rate = median(rate_d0), 
+#                Rural_In = median(totin_d[rural == 1]),
+#               Rural_Out = median(totout_d[rural == 1]),
+#                 Rural_Rate = median(rate_d0[rural == 1]),
+#                  Urban_In = median(totin_d[rural == 0]),
+#               Urban_Out = median(totout_d[rural == 0]),
+#                 Urban_Rate = median(rate_d0[rural == 0]) 
+#               )
+# 
+# all %>% gt(rowname_col = "year") %>% 
+#   tab_spanner_delim(
+#     delim = "_") %>% 
+#   tab_style(
+#     style = gt::cell_borders(
+#       sides = "right",
+#       weight = px(2)),
+#     locations = cells_body(columns = c("Year", "Overall_Rate", "Rural_Rate")
+#     )) %>% 
+#   tab_caption(caption = "Median number of in migrants, median number of out migrants, and median age-adjusted premature mortality rate by year and county type")
+#     
+
+
+
+
+# plotdat = migterm_imp %>% group_by(rural, year) %>% 
+#   mutate(medianrate = median(rate_d1),
+#          medianmig = median(migterm),
+#          rural = as.factor(rural)) %>% 
+#   select("year", "medianmig", "medianrate", "rural") %>% 
+#   pivot_longer(-c(year,rural), names_to = "var", values_to = "value")
+# 
+# ggplot(data = plotdat, aes(x = year, y = value, group = interaction(rural, var), color = as.factor(var), shape = rural)) + geom_line() + geom_point() + 
+#   labs(color = "", shape = "") + xlab("") + ylab("Age-adjusted premature deaths per 100,000 population") + 
+#   scale_color_manual(labels = c("Median weighted average migration term", "Median age-adjusted premature mortality rate"), values = c("darkblue", "darkred")) + 
+#   scale_shape_manual(labels = c("Urban", "Rural"), values = c(1, 0)) +
+#   theme_minimal()
+
+
+
+
+
+# Adding summary statistics for overall
+# summary_overall <- migterm_imp %>%
+#   summarise(
+#     n_counties = n_distinct(destid),
+#     n_obs = n(),
+#     migration_mean = mean(migrat, na.rm = TRUE),
+#     migration_sd = sd(migrat, na.rm = TRUE),
+#     mortality_mean = mean(rate_d1, na.rm = TRUE),
+#     mortality_sd = sd(rate_d1, na.rm = TRUE)
+#   )
+# 
+# summary_overall_table <- table1::table1(~ migration_mean + migration_sd + mortality_mean + mortality_sd, data = summary_overall, overall = "Overall", units = units)
+```
+
+
+
+<!--# Because we know county-level health to be related to county-level natality, and because our outcome variable (premature age-adjusted mortality) may not capture the health of young people in counties, we conducted a sensitivity analysis of the effect of natality on the effect of our migration term. We analyzed the the effect and explainability of our migration term using a subset of counties for which birth data was publicly available via CDC WONDER. We determined that natality does not change the effect or explainability of the migration term and therefore does not need to be included in our models. need table in appendix showing this -->
+
+
+
+```{r table for BIC scores to justify interaction for urb and inclution of migterm}
+#BIC scores were generated in "spatial mod selection.R"   
+
+
+spatonly = read.delim("chtc_outputs/modselection_nat.txt", sep = ",")  
+ref = spatonly$BIC[spatonly$Model == "fnom"] 
+
+spatonly$refbic = round(spatonly$BIC - ref, 2)   
+
+
+
+tf <- spatonly %>%
+  mutate(
+    `Migration Included` = !grepl("_nomig|nom", Model),
+    `Degrees of Freedom` = str_extract_all(Model, "\\d+"),
+    `BIC score relative to reference` = refbic,
+    `Urbanicity interaction` = grepl("r", Model)
+  )
+# Convert the list of numbers to a single string or set to "1" if no number is found
+tf$`Degrees of Freedom` <- sapply(tf$`Degrees of Freedom`, function(x) {
+  if (length(x) == 0) {
+    return("1")
+  } else {
+    return(paste(x, collapse = " "))
+  }
+})
+
+tf = tf %>% select(`Migration Included`, `Degrees of Freedom`, `BIC score relative to reference`, `Urbanicity interaction`)
+
+
+tf$`BIC score relative to reference`[tf$`BIC score relative to reference` == 0] = "REF"
+
+
+tf = tf %>% arrange(`Degrees of Freedom`, `Migration Included`, `Urbanicity interaction`)
+
+library(gt)
+
+gt::gt(tf) |> tab_style(style = list(cell_fill(color = "palegreen3"), 
+                                         cell_text(weight = "bold")),   
+                            locations = cells_body(rows = (`BIC score relative to reference` == min(as.numeric(`BIC score relative to reference`), na.rm = TRUE)))) |>   
+  tab_style(style = list(cell_fill(color = "lightgrey"),                    
+                         cell_text(weight = "bold")),                     
+            locations = cells_body(rows = (`BIC score relative to reference` == 0))) |>   
+   tab_header(title = "Change in BIC relative to reference")   
+
+```
+
+
