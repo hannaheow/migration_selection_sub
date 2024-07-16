@@ -53,3 +53,35 @@ write.table(missing_combinations, file = "data_processed/missingcombos.txt",
           row.names = FALSE, col.names = FALSE, sep = ", ",
           quote = FALSE)
 
+
+
+#####################################################################################
+######################################################################################
+#### for investigation with more granularity for kur and kru specifically 
+
+# for reference: kuu = l, kur = k, kru = j, krr = i
+
+ki = 0 #krr 
+kj = seq(0, 100, by = 5) #kru 
+kl = 0 #kuu
+kk = seq(0, 100, by = 5) #kur  
+
+
+testcon = file("data_processed/loopvals_restrict_kurkru.txt", open = "a")
+isOpen(testcon)
+
+
+for(i in 1:length(ki)) {
+  for(j in 1:length(kj)) {
+    for (k in 1:length(kk)) {
+      for (l in 1:length(kl)) {
+        cat(paste(ki[i], kj[j], kk[k], kl[l], sep = ", "), file = testcon, append = TRUE, sep = "\n")
+      }
+    }
+  }
+}
+close(testcon)
+
+
+
+

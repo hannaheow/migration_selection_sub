@@ -162,3 +162,53 @@ gt::gt(tf) |> tab_style(style = list(cell_fill(color = "palegreen3"),
 ```
 
 
+
+
+```{r lotsa plots (from chatgpt) we do not need all of these }
+# Function to create the plots
+create_plot <- function(constant_var, constant_value) {
+  # Filter data based on constant_var and constant_value
+  bicmin <- bicktot %>%
+    filter((!!sym(constant_var)) == constant_value)
+  
+  # Create a new column for colorvar based on the remaining variables
+  colorvar <- setdiff(c("kur", "krr", "kuu", "kru"), constant_var)
+  bicmin$colorvar <- ifelse(bicmin[[colorvar[1]]] > 0, 1, 0)
+  
+  # Define labels based on the constant variable
+  x_label <- switch(constant_var,
+                    "kur" = expression(d[ur]),
+                    "krr" = expression(d[rr]),
+                    "kuu" = expression(d[uu]),
+                    "kru" = expression(d[ru]))
+  
+  y_label <- "BIC"
+  title <- "Urban-Rural Migration"
+  subtitle <- bquote(paste("Relationship between BIC and ", .(x_label), "\n (assuming that ", .(constant_var), " = ", .(constant_value), ")"))
+  
+  # Create the plot
+  ggplot(aes_string(x = colorvar[2], y = "bicspat", color = "as.factor(colorvar)"), data = bicmin) +
+    geom_point(alpha = 0.3) +
+    xlab(x_label) +
+    ylab(y_label) +
+    theme_bw() +
+    labs(subtitle = subtitle, title = title) +
+    scale_color_manual(
+      values = c("0" = "red", "1" = "blue"),
+      labels = c("0" = expression(d[ur] <= 0), 
+                 "1" = expression(d[ur] > 0))) +
+    guides(color = guide_legend(title = NULL))
+}
+
+# Define constant values and variables
+constant_vars <- c("kuu", "krr", "kur", "kru")
+constant_values <- seq(-40, 40, by = 10)
+
+# Generate plots for all combinations of constant_var and constant_value
+for (constant_var in constant_vars) {
+  for (constant_value in constant_values) {
+    print(create_plot(constant_var, constant_value))
+  }
+}
+```
+
