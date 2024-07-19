@@ -2,9 +2,13 @@
 title: "Accounting for migration in spatiotemporal models of county-level health"
 date: ""
 author: "Hannah Olson-Williams, Amy Cochran"
-format: docx  
+format: 
+  docx:
+    warning: false
+    message: false
+    echo: false   
 editor: visual
-bibliography: references.bib
+#bibliography: references.bib
 ---
 
 <!--# perhaps should add: -->
@@ -68,6 +72,9 @@ The table below presents descriptive statistics for $y_{it}$​ (premature age-a
 ```{r table1 as dreamed up by chatgpt }
 
 # probably need to find a way to add units to this somehow 
+library(tidyverse)
+library(ggplot2)
+library(table1)
 
 load("data_processed/migterm_imp.Rdata")
 
@@ -119,7 +126,7 @@ Our weighted-average approach implicitly accounts for between-county selection f
 
 To determine whether the role that county-to-county migration flows play in county-level health outcomes differs significantly between rural and urban counties (Hypothesis 2), we added a factor term for urbanicity including interaction terms between urbanicity and $y_{i,t-1}$ and urbanicity and $mig_{i,t}$ to the models accounting for spatial error used to test Hypothesis 1. We again compared these models using BIC while iteratively adding splines with equal degrees of freedom for migration and lagged premature mortality.
 
-To maximize the number of counties per category, we chose to use only two urbanization categorizations: urban and rural, where urban includes large central metro, medium metro, and small metro counties, and rural includes micropolitan and noncore counties. We assessed \`r length(unique(migterm_imp$destid[migterm_imp$rural == 1\])) \` unique rural counties and r length(unique(migterm_imp$destid[migterm_imp$rural == 0\])) unique urban counties over 8 migration periods. We utilized the same steps outlined above to determine which model had the most explanatory power and lowest BIC score.
+To maximize the number of counties per category, we chose to use only two urbanization categorizations: urban and rural, where urban includes large central metro, medium metro, and small metro counties, and rural includes micropolitan and noncore counties. We assessed `r length(unique(migterm_imp$destid[migterm_imp$rural == 1]))` unique rural counties and `r length(unique(migterm_imp$destid[migterm_imp$rural == 0]))` unique urban counties over 8 migration periods. We utilized the same steps outlined above to determine which model had the most explanatory power and lowest BIC score.
 
 Finally, to determine whether taking into account unmeasured factors in county-to-county migration flows improves our ability to explain county-level health outcomes (Hypothesis 3), we added parameters $k_{ij}$ and $l_i$ to the premature mortality rate of each origin $j$ and each destination $i$ within our equation for the migration term. We call this new simulated migration term $smig_{it}$. The equation for $smig_{it}$ is shown below:
 
@@ -298,6 +305,7 @@ In the plot below, we see $d_{ur}$ and $d_{ru}$ plotted versus BIC score while h
 library(ggplot2)
 library(dplyr)
 
+load("data_processed/bickdf.Rdata")
 load("data_processed/bick_restrict_tot.Rdata")
 # Combine the datasets and convert columns to numeric
 bicktot <- rbind(bick_restrict_tot, bickdf) %>%
@@ -337,78 +345,6 @@ ggplot(bicmin_combined, aes(x = as.numeric(ifelse(type == "kru", kru, kur)), y =
 
 This is somewhat counter to what the literature says about health and migration. Typically migrants are healthier on average than the general population. <!--# cite --> But it is important to consider relative to whom. In our models, we have found that migrants with rural destinations are no more or less healthy than others within their urban origin counties - this could indicate that older (less healthy) individuals tend to move to rural places from urban places. Meanwhile, we found that migrants with urban destinations tend to be slightly less healthy than others within their rural origin counties - this could indicate that people migrate to cities seeking resources which could be tied to health CITE. Interestingly, when we isolate the effects of rural-urban migration and urban-rural migration on BIC score separately, we see that trends in BIC score are primarily driven by rural-urban migration; there does not appear to be a strong relationship between BIC score and the difference in premature mortality rate of urban origin and rural destination counties, but there does appear to be a strong relationship between BIC score and the difference in premature mortality rate of rural origin and urban destination counties.
 
-```{r lotsa plots to see if there are any trends }
-load("data_processed/bick_restrict_tot.Rdata")
-load("data_processed/bickdf.Rdata")
-
-bicktot = rbind(bick_restrict_tot, bickdf)
-
-summary(bicktot$bicspat)
-
-weirdbic = bicktot %>% filter(bicspat>360000)
-
-ggplot(weirdbic, aes(x = krr, y = bicspat)) + geom_point()
-```
-
-```{r plot for ksim_urbrural }
-load("data_processed/bickdf.Rdata")
-
-bicmin = bickdf %>% filter(kuu == 0 & krr == 0)
-
-bicmin$colorvar = ifelse(bicmin$kur >0, 1, 0)
-
-
-lattice::wireframe(bicspat ~ as.numeric(kru) * as.numeric(kur) , data = bicmin)
-ggplot(aes(x = as.numeric(kur), y = as.numeric(bicspat)), data = bicmin) +
-  geom_point() +
-  xlab("Difference in average premature mortality rate\n between urban origin counties and rural destination counties") +
-  ylab("BIC") +
-  theme_bw() +
-  labs(subtitle = expression(paste("Relationship between BIC and ", d[ij], "\n (assuming that ", d[rr], " = 0, and ", d[uu], " = 0)")),
-       title = "Urban-Rural Migration")
-
-
-
-ggplot(aes(x = as.numeric(kru), y = as.numeric(bicspat), color = as.factor(colorvar)), data = bicmin) + 
-  geom_point() + 
-  xlab("Difference in average premature mortality rate\n between rural origin counties and urban destination counties") +
-  ylab("BIC") + 
-  theme_bw() +
-  labs(subtitle = expression(paste("Relationship between BIC and ", d[ij], "\n (assuming that ", d[rr], " = 0, and ", d[uu], " = 0)")),
-       title = "Rural-Urban Migration",
-       color = "Modeling term for selection from urban to rural") +
-  scale_color_manual(
-    values = c("0" = "red", "1" = "blue"),
-    labels = c("0" = expression(d[ur] <= 0), 
-               "1" = expression(d[ur] >0)))
-
-```
-
-```{r}
-
-
-bicmin = bicktot %>% filter(kur == mostex$kur & kru == mostex$kru)
-
-plot(x = bicmin$krr, y = bicmin$kuu)
-
-bicmin = bicktot %>% filter(kuu == 0 & krr == 0)
-bicmin$colorvar = ifelse(bicmin$kur >0, 1, 0)
-
-lattice::wireframe(bicspat ~ as.numeric(kur) * as.numeric(kru) , data = bicmin)
-
-
-ggplot(aes(x = as.numeric(kru), y = as.numeric(bicspat), color = as.factor(colorvar)), data = bicmin) +
-  geom_point() +
-  xlab("Difference in average premature mortality rate\n between urban origin counties and rural destination counties") +
-  ylab("BIC") +
-  theme_bw() +
-  labs(subtitle = expression(paste("Relationship between BIC and ", d[ij], "\n (assuming that ", d[rr], " = 0, and ", d[uu], " = 0)")),
-       title = "Urban-Rural Migration") +
-  scale_color_manual(
-    values = c("0" = "red", "1" = "blue"),
-    labels = c("0" = expression(d[rr] <= 0), 
-               "1" = expression(d[rr] >0)))
-```
 
 ### Discussion and Limitations {.underline}
 
