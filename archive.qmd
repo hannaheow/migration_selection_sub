@@ -212,3 +212,84 @@ for (constant_var in constant_vars) {
 }
 ```
 
+
+
+
+```{r plot of bicmin}
+
+load("data_processed/bick_restrict_tot.Rdata")
+load("data_processed/bickdf.Rdata")
+
+bicktot = rbind(bick_restrict_tot, bickdf)
+# Convert the specified columns to numeric
+bicktot <- bicktot %>%
+  mutate(
+    kur = as.numeric(kur),
+    krr = as.numeric(krr),
+    kuu = as.numeric(kuu),
+    kru = as.numeric(kru)
+  )
+
+mostex = bicktot[bicktot$bicspat == min(bicktot$bicspat),]
+
+bicmin = bicktot %>% filter(kuu == mostex$kuu & krr == mostex$krr & kur == mostex$kru)
+
+
+#lattice::wireframe(bicspat ~ as.numeric(kur) * as.numeric(kru) , data = bicmin)
+
+
+ggplot(aes(x = as.numeric(kru), y = as.numeric(bicspat)), data = bicmin) +
+  geom_point(alpha = 0.3) +
+  xlab(expression(d[ru])) +
+  ylab("BIC") +
+  theme_bw() +
+  labs(subtitle = expression(paste("Relationship between BIC and ", d[ru], "\n (assuming that ", d[rr], " = 0, and ", d[uu], " = 0)")),
+       title = "Urban-to-Rural Migration", legend.title = "") 
+
+
+
+
+bicmin = bicktot %>% filter(kru == mostex$kru & kuu == mostex$kuu & krr ==mostex$krr)
+
+#lattice::wireframe(bicspat ~ as.numeric(kur) * as.numeric(kru) , data = bicmin)
+
+
+ggplot(aes(x = as.numeric(kur), y = as.numeric(bicspat)), data = bicmin) +
+  geom_point(alpha = 0.3) +
+  xlab(expression(d[ru])) +
+  ylab("BIC") +
+  theme_bw() +
+  labs(subtitle = expression(paste("Relationship between BIC and ", d[ru], "\n (assuming that ", d[rr], " = 0, and ", d[uu], " = 0)")),
+       title = "Urban-to-Rural Migration", legend.title = "")
+
+
+```
+
+
+```{r plot for ksim with urb/rural differences ; echo = FALSE}
+# not currently in use??? 
+load("data_processed/bickdf.Rdata")
+
+
+
+bicmin = bickdf %>% filter(kuu == 0 & krr == 0)
+#lattice::wireframe(bicspat ~ as.numeric(kru) * as.numeric(kur) , data = bicmin)
+ggplot(aes(x = as.numeric(kur), y = as.numeric(bicspat)), data = bicmin) + 
+  geom_point() + 
+  xlab("Difference in average premature mortality rate\n between urban origin counties and rural destination counties") +
+  ylab("BIC") + 
+  theme_bw() +
+  labs(subtitle = expression(paste("Relationship between BIC and ", d[ij], "\n (assuming that ", d[rr], " = 0, and ", d[uu], " = 0)")),
+       title = "Urban-Rural Migration")
+
+
+ggplot(aes(x = as.numeric(kru), y = as.numeric(bicspat)), data = bicmin) + 
+  geom_point() + 
+  xlab("Difference in average premature mortality rate\n between rural origin counties and urban destination counties") +
+  ylab("BIC") + 
+  theme_bw() +
+  labs(subtitle = expression(paste("Relationship between BIC and ", d[ij], "\n (assuming that ", d[rr], " = 0, and ", d[uu], " = 0)")),
+       title = "Rural-Urban Migration")
+
+```
+

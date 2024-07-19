@@ -73,12 +73,34 @@ for (i in 1:length(files)){
   bick_restrict_miss = rbind(bick_restrict_miss, tempdat)
 }
 
-save(bick_restrict, file= "data_processed/bick_restrict_miss.Rdata")
+save(bick_restrict_miss, file= "data_processed/bick_restrict_miss.Rdata")
+
+
+#########################################################################
+# process the extra restricted ksim 
+
+files = list.files("chtc_outputs/output_bick_restrict_kurkru")
+
+bick_restrict_kurkru = data.frame()
+
+for (i in 1:length(files)){
+  load(paste0("chtc_outputs/output_bick_restrict_kurkru/",files[i]))
+  tempdat = bickij_int
+  bick_restrict_kurkru = rbind(bick_restrict_kurkru, tempdat)
+}
+
+save(bick_restrict_kurkru, file= "data_processed/bick_restrict_kurkru.Rdata")
+
+
+
 
 
 ###########################################################################
-# combine bic restrict and bic restrict miss 
+# combine bic restrict and bic restrict miss and bick restrict kurkru
 
-bick_restrict_tot = rbind(bick_restrict, bick_restrict_miss)
+bick_restrict_tot = rbind(bick_restrict, bick_restrict_miss, bick_restrict_kurkru)
 save(bick_restrict_tot, file= "data_processed/bick_restrict_tot.Rdata")
+
+
+
 
