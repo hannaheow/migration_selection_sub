@@ -108,11 +108,7 @@ editor: visual
 # summary_overall_table <- table1::table1(~ migration_mean + migration_sd + mortality_mean + mortality_sd, data = summary_overall, overall = "Overall", units = units)
 ```
 
-
-
 <!--# Because we know county-level health to be related to county-level natality, and because our outcome variable (premature age-adjusted mortality) may not capture the health of young people in counties, we conducted a sensitivity analysis of the effect of natality on the effect of our migration term. We analyzed the the effect and explainability of our migration term using a subset of counties for which birth data was publicly available via CDC WONDER. We determined that natality does not change the effect or explainability of the migration term and therefore does not need to be included in our models. need table in appendix showing this -->
-
-
 
 ```{r table for BIC scores to justify interaction for urb and inclution of migterm}
 #BIC scores were generated in "spatial mod selection.R"   
@@ -161,9 +157,6 @@ gt::gt(tf) |> tab_style(style = list(cell_fill(color = "palegreen3"),
 
 ```
 
-
-
-
 ```{r lotsa plots (from chatgpt) we do not need all of these }
 # Function to create the plots
 create_plot <- function(constant_var, constant_value) {
@@ -211,9 +204,6 @@ for (constant_var in constant_vars) {
   }
 }
 ```
-
-
-
 
 ```{r plot of bicmin}
 
@@ -265,7 +255,6 @@ ggplot(aes(x = as.numeric(kur), y = as.numeric(bicspat)), data = bicmin) +
 
 ```
 
-
 ```{r plot for ksim with urb/rural differences ; echo = FALSE}
 # not currently in use??? 
 load("data_processed/bickdf.Rdata")
@@ -293,3 +282,78 @@ ggplot(aes(x = as.numeric(kru), y = as.numeric(bicspat)), data = bicmin) +
 
 ```
 
+```{r #exploration of weird BIC scores (w 4df, hopefully fixed???) }
+
+
+load("data_processed/bick_restrict_tot.Rdata")
+load("data_processed/bickdf.Rdata")
+
+bicktot = rbind(bick_restrict_tot, bickdf)
+
+summary(bicktot$bicspat)
+
+weirdbic = bicktot %>% filter(bicspat>360000)
+
+ggplot(weirdbic, aes(x = krr, y = bicspat)) + geom_point()
+```
+
+```{r}
+{r plot for ksim_urbrural }
+load("data_processed/bickdf.Rdata")
+
+bicmin = bickdf %>% filter(kuu == 0 & krr == 0)
+
+bicmin$colorvar = ifelse(bicmin$kur >0, 1, 0)
+
+
+lattice::wireframe(bicspat ~ as.numeric(kru) * as.numeric(kur) , data = bicmin)
+ggplot(aes(x = as.numeric(kur), y = as.numeric(bicspat)), data = bicmin) +
+  geom_point() +
+  xlab("Difference in average premature mortality rate\n between urban origin counties and rural destination counties") +
+  ylab("BIC") +
+  theme_bw() +
+  labs(subtitle = expression(paste("Relationship between BIC and ", d[ij], "\n (assuming that ", d[rr], " = 0, and ", d[uu], " = 0)")),
+       title = "Urban-Rural Migration")
+
+
+
+ggplot(aes(x = as.numeric(kru), y = as.numeric(bicspat), color = as.factor(colorvar)), data = bicmin) + 
+  geom_point() + 
+  xlab("Difference in average premature mortality rate\n between rural origin counties and urban destination counties") +
+  ylab("BIC") + 
+  theme_bw() +
+  labs(subtitle = expression(paste("Relationship between BIC and ", d[ij], "\n (assuming that ", d[rr], " = 0, and ", d[uu], " = 0)")),
+       title = "Rural-Urban Migration",
+       color = "Modeling term for selection from urban to rural") +
+  scale_color_manual(
+    values = c("0" = "red", "1" = "blue"),
+    labels = c("0" = expression(d[ur] <= 0), 
+               "1" = expression(d[ur] >0)))
+
+```
+
+```{r}
+
+
+bicmin = bicktot %>% filter(kur == mostex$kur & kru == mostex$kru)
+
+plot(x = bicmin$krr, y = bicmin$kuu)
+
+bicmin = bicktot %>% filter(kuu == 0 & krr == 0)
+bicmin$colorvar = ifelse(bicmin$kur >0, 1, 0)
+
+lattice::wireframe(bicspat ~ as.numeric(kur) * as.numeric(kru) , data = bicmin)
+
+
+ggplot(aes(x = as.numeric(kru), y = as.numeric(bicspat), color = as.factor(colorvar)), data = bicmin) +
+  geom_point() +
+  xlab("Difference in average premature mortality rate\n between urban origin counties and rural destination counties") +
+  ylab("BIC") +
+  theme_bw() +
+  labs(subtitle = expression(paste("Relationship between BIC and ", d[ij], "\n (assuming that ", d[rr], " = 0, and ", d[uu], " = 0)")),
+       title = "Urban-Rural Migration") +
+  scale_color_manual(
+    values = c("0" = "red", "1" = "blue"),
+    labels = c("0" = expression(d[rr] <= 0), 
+               "1" = expression(d[rr] >0)))
+```
