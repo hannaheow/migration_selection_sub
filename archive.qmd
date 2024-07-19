@@ -285,8 +285,8 @@ ggplot(aes(x = as.numeric(kru), y = as.numeric(bicspat)), data = bicmin) +
 ```{r #exploration of weird BIC scores (w 4df, hopefully fixed???) }
 
 
-load("data_processed/bick_restrict_tot.Rdata")
-load("data_processed/bickdf.Rdata")
+load("data_processed/bick_restrict.Rdata")
+#load("data_processed/bickdf.Rdata")
 
 bicktot = rbind(bick_restrict_tot, bickdf)
 
@@ -297,8 +297,7 @@ weirdbic = bicktot %>% filter(bicspat>360000)
 ggplot(weirdbic, aes(x = krr, y = bicspat)) + geom_point()
 ```
 
-```{r}
-{r plot for ksim_urbrural }
+```{r plot for ksim_urbrural }
 load("data_processed/bickdf.Rdata")
 
 bicmin = bickdf %>% filter(kuu == 0 & krr == 0)
