@@ -34,7 +34,9 @@ nm = natmorturb_imp %>% rename(rural_dest = rural) %>%
 # this formula produced lowest bic for spatial and non spatial models as shown in "spatial mod selection.R" 
 # note: changed "rural" to "rural_dest" to match new var names 
 # kind of unsure about this strat versus nonstrat approach 
-fff4 = rate_d1 ~ ft + ns(rate_d0, df = 4)*as.factor(rural_dest) + ns(migterm, df = 4)*as.factor(rural_dest) + as.factor(rural_dest)
+
+# changed to two df from 4 df (hoping maybe to avoid some singularity/overfitting issues) and plots show no large diff between 2 and 4 df 
+fff4 = rate_d1 ~ ft + ns(rate_d0, df = 2)*as.factor(rural_dest) + ns(migterm, df = 2)*as.factor(rural_dest) + as.factor(rural_dest)
 
 
 # get geography for use on spatial stuff 
