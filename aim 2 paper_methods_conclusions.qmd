@@ -21,43 +21,50 @@ editor: visual
 
 <!--#  need sensitivity analysis with natality before adding urb; so basically 1) add mig; 2) add natality; 3) decide about natality; 3) add urb  -->
 
-### [Approach]{.underline}
+### ~~Methods~~ 
 
-We test the following hypotheses:
+<!--# hypotheses should be at end of intro instead -->~~We test the following hypotheses:~~
 
-1.  County-to-county migration flows improve the explainability of spatiotemporal models of county-level health outcomes.
+1.  ~~County-to-county migration flows improve the explainability of spatiotemporal models of county-level health outcomes.~~
 
-2.  County-to-county migration flows improve the explainability of spatiotemporal models of county-level health outcomes, even after accounting for rurality.
+2.  ~~County-to-county migration flows improve the explainability of spatiotemporal models of county-level health outcomes, even after accounting for rurality.~~
 
-3.  Taking into account unmeasured factors in county-to-county migration flows improves our ability to explain county-level health outcomes as well as the differential role that migration plays in urban versus rural counties.
+3.  ~~Taking into account unmeasured factors in county-to-county migration flows improves our ability to explain county-level health outcomes as well as the differential role that migration plays in urban versus rural counties.~~
 
-Considering the exploratory nature of these hypotheses, we first establish a baseline model which is similar to autoregressive spatial error models of county-level mortality used in the past [@yang2012]. This baseline model includes yearly mortality rates as a function of time (treated categorically) and premature mortality rates lagged by one year. Random intercepts for each destination county are included to account for variation between counties, following best practices for ecological studies[@greenland1989]. We tested splines with two to five degrees of freedom to account for potential nonlinearity in mortality rates. The baseline spatial error model (without splines) is shown below:\
+<!--# need data section here and then variables section (move migterm here) (table 1 still does not go here!!)  -->
 
-$$  y_{it} = \beta_0 + \sum_{k=1}^{K} \beta_{1k} \cdot \text{ft}_{k} + \beta_{2}y_{t-1,i} + \mu_{i} + \epsilon_{it}    $$
+<!--# need selection bias (dij) defined in variable section too  -->
 
-where\
-$y_{it}$ represents the predicted age-adjusted mortality rate of each destination county $i$ at year $t$.\
-$ft_{k}$ are binary factor variables for each year $k$ of available data (2012 through 2019) where $K$ is the number of years (8 total), such that $\beta_{1k}$ represents the effect of the $k$th year on $y_{it}$\
-$t$ is time, in years, treated continuously.\
-$y_{t-1,i}$ is the lagged age-adjusted mortality rate for each destination county $i$ at year $t-1$.\
-$\mu_{i}$ is a random intercept for each destination county $i$.\
-$\epsilon_{it}$ represents an error term accounting for spatial dependencies such that:
+## ~~Modeling~~ 
+
+~~Baseline Model~~
+
+~~We first establish a baseline model which is similar to autoregressive spatial error models of county-level mortality used in the past [@yang2012]. This baseline model includes yearly mortality rates as a function of time (treated categorically) and premature mortality rates lagged by one year. Random intercepts for each destination county are included to account for variation between counties, following best practices for ecological studies[@greenland1989]. We tested splines with two to five degrees of freedom to account for potential nonlinearity in mortality rates. The baseline spatial error model (without splines) is shown below:\
+~~
+
+$$  y_{it} = \beta_0 + \beta_{1t} + \beta_{2}y_{t-1,i} + \mu_{i} + \epsilon_{it}    $$
+
+~~where~~ <!--# want thsi in paragraph form instead of in a list; need to change definition of b1t to match eq above  -->~~\
+~~$y_{it}$ ~~represents the predicted age-adjusted mortality rate of each destination county~~ $i$ ~~at year~~ $t$~~.\
+~~$ft_{k}$ ~~are binary factor variables for each year~~ $k$ ~~of available data (2012 through 2019) where~~ $K$ ~~is the number of years (8 total), such that~~ $\beta_{1k}$ ~~represents the effect of the~~ $k$~~th year on~~ $y_{it}$~~\
+~~$t$ ~~is time, in years, treated continuously.\
+~~$y_{t-1,i}$ ~~is the lagged age-adjusted mortality rate for each destination county~~ $i$ ~~at year~~ $t-1$~~.\
+~~$\mu_{i}$ ~~is a random intercept for each destination county~~ $i$~~.\
+~~$\epsilon_{it}$ ~~represents an error term accounting for spatial dependencies such that:~~
 
 $$
 \epsilon_{it} = \lambda W \epsilon_{it} + u_{it}  
 $$
 
-where
+~~where~~
 
-$\epsilon_{it}$ is the random error term for each county $i$ at year $t$
+$\epsilon_{it}$ ~~is the random error term for each county~~ $i$ ~~at year~~ $t$
 
-$\lambda$ is the spatial autoregressive parameter
+$\lambda$ ~~is the spatial autoregressive parameter~~ <!--# describe interpretation here ; 0 lambda = no interdependence; large lambda lots of interdependence -->
 
-$W$ is the spatial weights matrix
+$W$ ~~is the spatial weights matrix~~ <!--# more detail here ; what kind of weights; how big is this matrix, etc -->
 
-$u_{it}$ is the spatially independent error term for each county $i$ at year $t$
-
-We began with our baseline model and iteratively added splines for the prior year's average county-level premature mortality rate and the migration term to capture potential nonlinear trends. To determine the best fitting model, we analyzed several models using the Bayesian Information Criterion (BIC), which is commonly used to identify models with the greatest explanatory power \[\@kuha2004\]. We observed that keeping the degrees of freedom equal for the splines of both the migration term and the premature mortality rate resulted in lower BIC scores, indicating better model fit. All models accounted for both spatial and random error and were created using the `splm` and `splines` R packages \[\@splines\]\[\@millo2023\].
+$u_{it}$ ~~is the spatially independent error term for each county~~ $i$ ~~at year~~ $t$<!--# need more context here -->
 
 To determine whether county-to-county migration flows improve the explainability of spatiotemporal models of county-level health outcomes (Hypothesis 1), we compared the baseline model to models that account for migration. To quantify migration, we developed a novel "migration term" which accounts for the mortality rates of individuals who have moved to a county of interest during a given period. This term is essentially a weighted average of the mortality rates of all the origin counties. We calculated the following for each change in year and for each destination county $i$:
 
@@ -69,9 +76,15 @@ $y_{it}$ was defined above\
 $out_{ijt}$ represents the number of migrants from a unique origin county $j$ who migrated to a destination county $i$ between year $t-1$ and year $t$.\
 $pop_{i, t-1}$ is the population of an unique destination county $i$ at initial year $t-1$\
 
-The table below presents descriptive statistics for $y_{it}$​ (premature age-adjusted mortality rate) and migration rates, categorized by year and county type. Note that migration rates for the year 2011 are not included. This is because the migration-flow data starts from 2011 to 2012, and these values are shown in the 2012 section of the table, corresponding with the 2012 premature age-adjusted mortality rates.
+Model fitting
+
+<!--# make more clear that migration term is added next -->We began with our baseline model and iteratively added splines for the prior year's average county-level premature mortality rate and the migration term to capture potential nonlinear trends. To determine the best fitting model, we analyzed several models using the Bayesian Information Criterion (BIC), which is commonly used to identify models with the greatest explanatory power \[\@kuha2004\]. We observed that keeping the degrees of freedom equal for the splines of both the migration term and the premature mortality rate resulted in lower BIC scores, indicating better model fit. All models accounted for both spatial and random error and were created using the `splm` and `splines` R packages \[\@splines\]\[\@millo2023\].
+
+<!--# this goes in the results section -->The table below presents descriptive statistics for $y_{it}$​ (premature age-adjusted mortality rate) and migration rates, categorized by year and county type. Note that migration rates for the year 2011 are not included. This is because the migration-flow data starts from 2011 to 2012, and these values are shown in the 2012 section of the table, corresponding with the 2012 premature age-adjusted mortality rates.
 
 ```{r table1 as dreamed up by chatgpt }
+
+# this should go in the result section!!! 
 
 # probably need to find a way to add units to this somehow 
 library(tidyverse)
@@ -277,7 +290,7 @@ ggplot(data = tf, aes(x = `Degrees of Freedom`,
 
 ```
 
-In the plot above, we see that there is very little difference in the BIC scores of models with splines with two degrees of freedom and models with splines with four degrees of freedom. Due to concerns about potential overfitting, and since there appears to be little to no explainability added by additional degrees of freedom, we choose to use a model with splines with two degrees of freedom for lagged premature mortality rate and migration term. Thus, the model we use in our simulation is as follows:
+<!--# this goes in the model fitting section; no equations in results; and no data in method!! table1 is first thign in results -->In the plot above, we see that there is very little difference in the BIC scores of models with splines with two degrees of freedom and models with splines with four degrees of freedom. Due to concerns about potential overfitting, and since there appears to be little to no explainability added by additional degrees of freedom, we choose to use a model with splines with two degrees of freedom for lagged premature mortality rate and migration term. Thus, the model we use in our simulation is as follows:
 
 $$  y_{it} = \beta_0 + \sum_{k=1}^{K} \beta_{1k} \cdot \text{ft}_{k} + \sum_{k=1}^{K} \beta_{2k} ns(y_{t-1,i}, 2) \cdot r_i^{k} + \sum_{k=1}^{K} \beta_{3k} ns(migterm_{it}, 2) \cdot r_i^{k} + \sum_{k=1}^{K} \beta_{4k} r_i^{k} + \mu_i + \epsilon_{it} + \lambda W \epsilon_{it} + u_{it} $$
 
@@ -306,6 +319,9 @@ In a secondary simulation, in which we varied \$d\_{ij}\$ for each possible comb
 In the plot below, we see $d_{ur}$ and $d_{ru}$ plotted versus BIC score while holding $d$ for all other migration types constant at 0. The trend in BIC score is primarily driven by $d_{ru}$, suggesting that migration from urban origins to rural destinations primarily drives the explanatory power of models of county-level health. This makes sense because there are more rural destination counties than urban destination counties. Additionally, rural counties have smaller populations than urban counties which makes their average health more malleable.
 
 ```{r separate plots for kur and kru mins }
+
+# can describe holding vars constant as examining the trends while no selection bias in some regions; for interpretability, etc 
+# of the four params, which ones are most important (prob non zeros)
 
 library(ggplot2)
 library(dplyr)
