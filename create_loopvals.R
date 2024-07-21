@@ -83,5 +83,33 @@ for(i in 1:length(ki)) {
 close(testcon)
 
 
+#####################################################################################
+######################################################################################
+#### for investigation of 20 increment with kuu special 
+
+# for reference: kuu = l, kur = k, kru = j, krr = i
+
+ki = seq(-80,80, by = 20) #krr 
+kj = seq(-80,80, by = 20) #kru 
+kl = seq(-140,20, by = 20) #kuu
+kk = seq(-80,80, by = 20) #kur  
+
+
+testcon = file("data_processed/loopvals_restrict_kuuspecial.txt", open = "a")
+isOpen(testcon)
+
+
+for(i in 1:length(ki)) {
+  for(j in 1:length(kj)) {
+    for (k in 1:length(kk)) {
+      for (l in 1:length(kl)) {
+        cat(paste(ki[i], kj[j], kk[k], kl[l], sep = ", "), file = testcon, append = TRUE, sep = "\n")
+      }
+    }
+  }
+}
+close(testcon)
+
+
 
 

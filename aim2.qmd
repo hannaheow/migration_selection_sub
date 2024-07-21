@@ -115,15 +115,15 @@ $$  smig_{it}(d_{ij}) = \frac{ \sum_{j\ne i} out_{jit} ( y_{j,t-1} + d_{ij}) + y
 
 Therefore, using the equation above, we simulate health-related selection occurring as a result of the differences in health between the origin and the destination counties. When $d_{ij}$ is positive, we estimate that the origin is less healthy than the destination. When $d_{ij}$ is negative, we estimate that the origin is healthier than the destination.
 
-To determine which values of $d_{ij}$ best explain trends in county-level premature mortality rates, we replace @eq-mig with @eq-smig_d in the model with the most explanatory power, @eq-forsimulation, as determined in our previous model selection steps. We tested many potential values of $d_{ij}$, beginning with incrementing by 50 from -200 to 200 such that migrants had an estimated premature mortality rate that was between 200 premature deaths per 100,000 population higher and 200 premature deaths per 100,000 population lower than their origin county.
+To determine which values of $d_{ij}$ best explain trends in county-level premature mortality rates, we replace $mig_{it}$ (@eq-mig) with $smig_{it}(d_{ij})$ (@eq-smig_d) in the model with the most explanatory power, @eq-forsimulation, as determined in our previous model selection steps. We tested many potential values of $d_{ij}$. We began by incrementing by 50 from -200 to 200 such that migrants had an estimated premature mortality rate that was between 200 premature deaths per 100,000 population higher and 200 premature deaths per 100,000 population lower than their origin county.
 
 To understand this phenomenon further, we next conducted a grid search to test potential values of $d_{ij}$ when accounting for urbanicity. Specifically, we examined how the values of $d_{ij}$ vary based on the urbanicity of both the origin and destination counties. We defined these variations as follows: $d_{uu}$ for the difference in average health between an urban origin and an urban destination, $d_{rr}$ for the difference in average health between a rural origin and a rural destination, $d_{ru}$ for the difference in average health between a rural origin and an urban destination, and $d_{ur}$ for the difference in average health between an urban origin and a rural destination.
 
-We began with a broad increment of 50, testing \$d\_{ij}\$ values ranging from -200 to 200 premature deaths per 100,000 higher than the destination county, resulting in 6,561 unique sets of \$(d\_{uu}, d\_{rr}, d\_{ru}, d\_{ur})\$. After identifying a range of \$d\_{ij}\$ values that minimized the BIC score, we refined our search. Using a smaller increment of 10, we tested \$d\_{ij}\$ values within a range of -40 to 40 premature deaths per 100,000 higher than the destination county, resulting in another 6,561 unique sets of \$(d\_{uu}, d\_{rr}, d\_{ru}, d\_{ur})\$. Finally, observing trends in BIC for models with \$d\_{ij}\$ values between -40 and 40, we noted patterns suggesting the lowest BIC score might result from \$d\_{ru}\$ and \$d\_{ur}\$ values outside this range. Thus, we performed another refined search, holding \$d\_{uu}\$ and \$d\_{rr}\$ constant at 0 and iterating from 0 to 100 by 5 for both \$d\_{ur}\$ and \$d\_{ru}\$, resulting in an additional 441 unique sets of $(d_{uu}, d_{rr}, d_{ru}, d_{ur})$. <!--# flowchart here???? -->
+We began with a broad increment of 50, testing \$d\_{ij}\$ values ranging from -200 to 200 premature deaths per 100,000 higher than the destination county, resulting in 6,561 unique sets of \$(d\_{uu}, d\_{rr}, d\_{ru}, d\_{ur})\$. After identifying a range of \$d\_{ij}\$ values that minimized the BIC score, we refined our search. Using a smaller increment of 20, we tested \$d\_{uu}\$ values within a range of -140 to 20 age-adjusted premature mortality rate different from the destination county and values of \$d\_{ur}\$, \$d\_{rr}\$, and \$d\_{ru}\$ within a range of -80 to 80, resulting in another 6,561 unique sets of $(d_{uu}, d_{rr}, d_{ru}, d_{ur})$. ~~Finally, observing trends in BIC for models with \$d\_{ij}\$ values between -40 and 40, we noted patterns suggesting the lowest BIC score might result from \$d\_{ru}\$ and \$d\_{ur}\$ values outside this range. Thus, we performed another refined search, holding \$d\_{uu}\$ and \$d\_{rr}\$ constant at 0 and iterating from 0 to 100 by 5 for both \$d\_{ur}\$ and \$d\_{ru}\$, resulting in an additional 441 unique sets of~~ $(d_{uu}, d_{rr}, d_{ru}, d_{ur})$~~.~~ <!--# flowchart here???? -->
 
 ### [**Results and Conclusions**]{.underline}
 
-The tables below presents descriptive statistics for $y_{it}$​ (premature age-adjusted mortality rate) and migration rates for each year and categorized by county type (rural, urban). Note that migration rates for the year 2011 are not included. This is because the migration-flow data starts from 2011 to 2012, and these values are shown in the 2012 section of the table, corresponding with the 2012 premature age-adjusted mortality rates.
+The tables below present descriptive statistics for $y_{it}$​ (premature age-adjusted mortality rate) and migration rates for each year and categorized by county type (rural, urban). Note that migration rates for the year 2011 are not included. This is because the migration-flow data starts from 2011 to 2012, and these values are shown in the 2012 section of the table, corresponding with the 2012 premature age-adjusted mortality rates.
 
 ```{r table1 as dreamed up by chatgpt }
 
@@ -251,9 +251,9 @@ ggplot(data = tf, aes(x = `Degrees of Freedom`,
 
 ```
 
-In the plot above, we see that the difference in the BIC scores of models with splines with two degrees of freedom and models with splines with four degrees of freedom for $y_{i,t-1}$ and $mig_{it}$ is only `r abs(round(spatonly$BIC[spatonly$Model == "fff4r"] - spatonly$BIC[spatonly$Model == "fff2r"], 1))`. Due to concerns about potential overfitting, and since there appears to be little explainability <!--# maybe need a citation or something here??? --> added by additional degrees of freedom, we choose to use a model with splines with two degrees of freedom for lagged premature mortality rate and migration term, thus, we settled on the model @eq-forsimulation.
+In the plot above, we see that the difference in the BIC scores of models with splines with two degrees of freedom and models with splines with four degrees of freedom for $y_{i,t-1}$ and $mig_{it}$ is only `r abs(round(spatonly$BIC[spatonly$Model == "fff4r"] - spatonly$BIC[spatonly$Model == "fff2r"], 1))`. Due to concerns about potential overfitting, and since there appears to be little explainability <!--# maybe need a citation or something here??? --> added by additional degrees of freedom, we chose to use a model with splines with two degrees of freedom for lagged premature mortality rate and migration term, thus, we settled on the model @eq-forsimulation.
 
-After replacing @eq-mig with @eq-smig_d in @eq-forsimulation, and testing values of $d_{ij}$ between -200 and 200 iterating by 50, we found that the model with the most explanatory power had $d_{ij} = 0$. As the magnitude of the difference between the health of origin and destination increased, our models had less explanatory power and higher BIC scores. This is shown in the plot below. This suggests that, according to our models, health-related selection for migration may not be important to modelling county-level health.
+After replacing $mig_{it}$ (@eq-mig) with $smig_{it}(d_{ij})$ (@eq-smig_d) in @eq-forsimulation, and testing values of $d_{ij}$ between -200 and 200 iterating by 50, we found that the model with the most explanatory power had $d_{ij} = 0$. As the magnitude of the difference between the health of origin and destination increased, our models had less explanatory power as measured by higher BIC scores. This is shown in the plot below. This suggests that, according to our models, health-related selection for migration may not be important to modelling county-level health when we do not account for urbanicity.
 
 ```{r ksim without urb, just k, echo = FALSE}
 #this might have to be removed or updated since it uses 4df 
@@ -268,6 +268,98 @@ ggplot(data = bick_nourb_tot, aes(x = as.numeric(newk), y = as.numeric(bicspat))
 
 ```
 
-To explore the possibility of health-related selection further, we conducted a second simulation, in which we varied \$d\_{ij}\$ for each possible combination of origin and destination type. Again we incremented by 50 from -200 to 200. In the plot below, we see that the minimum BIC score occurs for $(d_{uu} =0, d_{rr}=0, d_{ru}=25, d_{ur} = 40)$. This suggests that for rural to urban migration, represented by $d_{ur}$, rural origins have slightly higher premature age-adjusted mortality rates than their corresponding urban destinations. Meanwhile, for urban to rural migration, represented by $d_{ru}$, urban origins have slightly higher premature age-adjusted mortality rates than their corresponding rural destinations. In both cases, movers tend to migrate from less healthy places to healthier places, with the difference between the average health of the origin and the average health of the destination being slightly greater when moving from rural to urban. Of course, this makes sense, since, on average, rural counties have higher premature age-adjusted mortality rates than urban counties.
+To explore the possibility of health-related selection further, we conducted a second simulation, in which we varied \$d\_{ij}\$ for each possible combination of origin and destination type: rural-to-urban, rural-to-rural, urban-to-rural, and urban-to-urban. In the plot below, we see the number of destination counties for each migration type over time. Notably, the rural-to-rural migration type has the most unique destination counties because there are more rural counties than urban counties. This approach allows us to emphasize all counties, instead of focusing primarily on urban migration, which is more commonly studied.
 
-In the plot below, we see $d_{ur}$ and $d_{ru}$ plotted versus BIC score while holding $d$ for all other migration types constant at 0. The trend in BIC score is primarily driven by $d_{ru}$, suggesting that migration from urban origins to rural destinations primarily drives the explanatory power of models of county-level health. This makes sense because there are more rural destination counties than urban destination counties. Additionally, rural counties have smaller populations than urban counties which makes their average health more malleable.
+```{r {migtype by year}
+load("data_processed/imputed_for_ksim.RData")
+
+#this dataset is called natmorturb_imp
+# it has natality, death, population, premature mortality rates, migration flows, rural/urb codes but no migterms (yet)
+# it is balanced and has no missing rates (except for initial years)
+
+urbcodes = haven::read_sas("data_raw/nchs_urbanicity_wlabels.sas7bdat") %>% 
+  select(fipscode, rural) %>% 
+  rename(rural_orig = rural)
+#add rural/urb for origin 
+nm = natmorturb_imp %>% rename(rural_dest = rural) %>% 
+  left_join(urbcodes, by = join_by(origid == fipscode)) %>% 
+  mutate(migtype = ifelse(!is.na(rural_dest)& !is.na(rural_orig), paste0(rural_dest, rural_orig), NA)) 
+
+
+migtypecounts = nm %>% group_by(migtype, year) %>% 
+  summarize(n_distinct(destid)) %>% 
+ # filter(year !=2011) %>% # these nas are for getting the initial
+  filter(!is.na(migtype)) %>% #these nans are just for getting the starting pop and mort vals for each county for each year 
+  mutate(year = as.numeric(year))
+
+# Define mapping for migtype labels
+migtype_labels <- c("00" = "Urban-to-urban",
+                    "11" = "Rural-to-rural",
+                    "10" = "Urban-to-rural",
+                    "01" = "Rural-to-urban")
+my_palette <- c("#1f78b4", "#33a02c", "#e31a1c", "#ff7f00")
+
+ggplot(data= migtypecounts) + 
+  geom_point(aes(x = year, y = `n_distinct(destid)`, color = migtype)) + 
+  geom_line(aes(x = year, y = `n_distinct(destid)`, color = migtype)) + 
+  scale_x_continuous(breaks = unique(migtypecounts$year), labels = function(x) paste0(x - 1, " - ", x)) +
+  scale_color_manual(values = my_palette, labels = migtype_labels) +
+  labs(x = "Year", y = "Count of unique destination counties", color = "") +
+   theme_bw() +
+  theme(axis.text.x = element_text(angle = 20, hjust = 1)) 
+
+#urban to urban is basically flat because basically all urban counties are linked by migration 
+# there are 1159 unique urban destids in the dataset: nm %>% filter(rural_dest ==0) %>% summarize(n_distinct(destid))
+# and 2011-2012 and 2012-2013 appear similar but they do in fact have different values (no error here) 
+```
+
+In our urbanicity-specific simulation, we again incremented by 50 from -200 to 200. In the plot below, we see the relationships between BIC score and $d_{ij}$ for each migration type while holding $d$ for all other migration types constant at 0. For migration to rural destinations (represented by orange $d_{rr}$ and red $d_{ru}$), the minimum BIC score occurs when there is no difference in health between origin and destination. However, for migration to urban destinations, there is some evidence of lower BIC scores when urban origins have slightly lower age-adjusted premature mortality rates than their correpsonding urban destinations (represented by $d_{uu}$). In this case, movers tend to migrate from healthier urban counties to less healthy urban counties.
+
+```{r}
+#load("data_processed/bick_restrict.Rdata")
+load("data_processed/bickdf.Rdata")
+# Combine the datasets and convert columns to numeric
+#bicktot <- rbind(bick_restrict, bickdf) %>%
+ bicktot = bicktot %>%  mutate(
+    kur = as.numeric(kur),
+    krr = as.numeric(krr),
+    kuu = as.numeric(kuu),
+    kru = as.numeric(kru)
+  )
+
+# Find the most explanatory set
+mostex <- bicktot %>% filter(bicspat == min(bicspat))
+
+
+# Create a combined dataset for plotting
+bicmin_kuu <- bicktot %>% filter(kru == 0 & krr == 0 & kur == 0) %>% mutate(type = "kuu")
+bicmin_krr <- bicktot %>% filter(kru == 0 & kuu == 0 & kur == 0) %>% mutate(type = "krr")
+bicmin_kur <- bicktot %>% filter(kru == 0 & krr == 0 & kuu == 0) %>% mutate(type = "kur")
+bicmin_kru <- bicktot %>% filter(kur == 0 & krr == 0 & kuu == 0) %>% mutate(type = "kru")
+
+# Combine the datasets for plotting
+bicmin_combined <- bind_rows(bicmin_kuu, bicmin_krr, bicmin_kur, bicmin_kru)
+
+# Plot
+ggplot(bicmin_combined, aes(x = as.numeric(case_when(
+  type == "kuu" ~ kuu,
+  type == "krr" ~ krr,
+  type == "kur" ~ kur,
+  type == "kru" ~ kru
+)), y = as.numeric(bicspat), color = type)) +
+  geom_point() +
+  geom_line() +
+  xlab(expression(d[ij])) +
+  ylab("BIC") +
+  theme_bw() +
+  labs(subtitle = expression(paste("Relationship between BIC and ", d[ij], "\n (assuming that other parameters are held constant at 0)")),
+       title = "Urban-Rural Migration") +
+  scale_color_manual(values = c("kuu" = "#1f77b4", "krr" = "#ff7f0e", "kur" = "#2ca02c", "kru" = "#d62728"),
+                     labels = c("kuu" = expression(paste(d[uu], " when all other parameters are held constant at 0")),
+                                "krr" = expression(paste(d[rr], " when all other parameters are held constant at 0")),
+                                "kur" = expression(paste(d[ur], " when all other parameters are held constant at 0")),
+                                "kru" = expression(paste(d[ru], " when all other parameters are held constant at 0")))) +
+  guides(color = guide_legend(title = NULL))
+```
+
+Based on the trends shown in the plot above, we narrowed our search increment to 20 and tested \$d\_{uu}\$ values within a range of -140 to 20 age-adjusted premature mortality rate different from the destination county and values of \$d\_{ur}\$, \$d\_{rr}\$, and \$d\_{ru}\$ within a range of -80 to 80, resulting in another 6,561 unique sets of $(d_{uu}, d_{rr}, d_{ru}, d_{ur})$. The results of this narrowed search are shown below:
