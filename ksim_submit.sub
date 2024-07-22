@@ -34,4 +34,4 @@ request_disk = 4GB
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 
-queue var_i, var_j, var_k, var_l from /home/holsonwillia/migration_selection_sub/data_processed/loopvals.txt
+queue var_i, var_j, var_k, var_l from /home/holsonwillia/migration_selection_sub/data_processed/loopvals_restrict_kuuspecial.txt
