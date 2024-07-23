@@ -1,11 +1,12 @@
 ---
-title: "aim2"
+title: "Accounting for migration in spatiotemporal models of county-level health"
 author: "Hannah Olson-Williams, Amy Cochran"
 format: 
   docx:
     message: false
     warning: false
     echo: false
+    error: false
 editor: visual
 bibliography: references.bib
 ---
@@ -119,14 +120,18 @@ To determine which values of $d_{ij}$ best explain trends in county-level premat
 
 To understand this phenomenon further, we next conducted a grid search to test potential values of $d_{ij}$ when accounting for urbanicity. Specifically, we examined how the values of $d_{ij}$ vary based on the urbanicity of both the origin and destination counties. We defined these variations as follows: $d_{uu}$ for the difference in average health between an urban origin and an urban destination, $d_{rr}$ for the difference in average health between a rural origin and a rural destination, $d_{ru}$ for the difference in average health between a rural origin and an urban destination, and $d_{ur}$ for the difference in average health between an urban origin and a rural destination.
 
-We began with a broad increment of 50, testing \$d\_{ij}\$ values ranging from -200 to 200 premature deaths per 100,000 higher than the destination county, resulting in 6,561 unique sets of \$(d\_{uu}, d\_{rr}, d\_{ru}, d\_{ur})\$. After identifying a range of \$d\_{ij}\$ values that minimized the BIC score, we refined our search. Using a smaller increment of 20, we tested a specific range of \$d\_{uu}\$ values to account for a -140 to 20 difference in age-adjusted premature mortality rates between urban origins and urban destinations. For all other types of migration, we used the same range. Therefore, we tested \$d\_{ur}\$, \$d\_{rr}\$, and \$d\_{ru}\$ values with a range of -80 to 80 difference between origin and destination. This resulted in an additional 6,561 unique sets of $(d_{uu}, d_{rr}, d_{ru}, d_{ur})$. ~~Finally, observing trends in BIC for models with \$d\_{ij}\$ values between -40 and 40, we noted patterns suggesting the lowest BIC score might result from \$d\_{ru}\$ and \$d\_{ur}\$ values outside this range. Thus, we performed another refined search, holding \$d\_{uu}\$ and \$d\_{rr}\$ constant at 0 and iterating from 0 to 100 by 5 for both \$d\_{ur}\$ and \$d\_{ru}\$, resulting in an additional 441 unique sets of~~ $(d_{uu}, d_{rr}, d_{ru}, d_{ur})$~~.~~ <!--# flowchart here???? -->
+We began with a broad increment of 50, testing $d_{ij}$ values ranging from -200 to 200 premature deaths per 100,000 higher than the destination county, resulting in 6,561 unique sets of $(d_{uu}, d_{rr}, d_{ru}, d_{ur})$. After identifying a range of $d_{ij}$ values that minimized the BIC score, we refined our search. Using a smaller increment of 20, we tested a specific range of $d_{uu}$ values to account for a -140 to 20 difference in age-adjusted premature mortality rates between urban origins and urban destinations. For all other types of migration, we used the same range. Therefore, we tested $d_{ur}$, $d_{rr}$, and $d_{ru}$ values with a range of -80 to 80 difference between origin and destination. This resulted in an additional 6,561 unique sets of $(d_{uu}, d_{rr}, d_{ru}, d_{ur})$. <!--# flowchart here???? -->
 
 ### [**Results and Conclusions**]{.underline}
 
 The tables below present descriptive statistics for $y_{it}$​ (premature age-adjusted mortality rate) and migration rates for each year and categorized by county type (rural, urban). Note that migration rates for the year 2011 are not included. This is because the migration-flow data starts from 2011 to 2012, and these values are shown in the 2012 section of the table, corresponding with the 2012 premature age-adjusted mortality rates.
 
-```{r table1 as dreamed up by chatgpt }
+# TABLE1 HERE
 
+```{r table1 calcs for rural and urban print rural only , results:hide}
+
+#| label: tbl-table1rural
+  
 library(tidyverse)
 library(ggplot2)
 library(table1)
@@ -172,8 +177,21 @@ table_urban <- table1::table1(~ migrat + rate_d1 | year,
                               caption = "Migration rate and mortality rate stratified by year for urban counties")
 
 # Display the tables
-table_rural
-table_urban
+table_rural = as.data.frame(table_rural)
+knitr::kable(table_rural, format = "markdown", caption = "Rural counties")
+
+
+
+
+
+
+```
+
+```{r table1 print urban only }
+#| label: tbl-table1urban
+# Display the tables
+table_urban = as.data.frame(table_urban)
+knitr::kable(table_urban, format = "markdown", caption = "Urban counties")
 
 ```
 
@@ -184,6 +202,7 @@ Next, we sought to determine whether our migration term would improve the explai
 The plot below demonstrates lower BIC scores for models that include the migration term along with an interaction between $y_{it}$ and urbanicity. The difference in BIC scores between models that include the migration term and those that do not is more pronounced when an interaction term for urbanicity is added. This suggests that the migration term significantly enhances model explainability when accounting for urbanicity, indicating that the relationship between average county-level health and migration may differ substantially across urbanicity levels.
 
 ```{r spatial models only, echo = FALSE, warning = FALSE, message = FALSE}
+#| label: fig-modelselection
 
 #need to find a way to fix the yi,t-1 label on the x axis 
 # also need to add the "REF" at 0 on the plot so it's obvious what we're comparing to 
@@ -268,7 +287,7 @@ ggplot(data = bick_nourb_tot, aes(x = as.numeric(newk), y = as.numeric(bicspat))
 
 ```
 
-To explore the possibility of health-related selection further, we conducted a second simulation, in which we varied \$d\_{ij}\$ for each possible combination of origin and destination type: rural-to-urban, rural-to-rural, urban-to-rural, and urban-to-urban. In the plot below, we see the number of destination counties for each migration type over time. Notably, the rural-to-rural migration type has the most unique destination counties because there are more rural counties than urban counties. This approach allows us to emphasize all counties, instead of focusing primarily on urban migration, which is more commonly studied.
+To explore the possibility of health-related selection further, we conducted a second simulation, in which we varied $d_{ij}$ for each possible combination of origin and destination type: rural-to-urban, rural-to-rural, urban-to-rural, and urban-to-urban. In the plot below, we see the number of destination counties for each migration type over time. Notably, the rural-to-rural migration type has the most unique destination counties because there are more rural counties than urban counties. This approach allows us to emphasize all counties, instead of focusing primarily on migration to urban destinations, which is more commonly studied.
 
 ```{r {migtype by year}
 load("data_processed/imputed_for_ksim.RData")
@@ -313,14 +332,19 @@ ggplot(data= migtypecounts) +
 # and 2011-2012 and 2012-2013 appear similar but they do in fact have different values (no error here) 
 ```
 
-In our urbanicity-specific simulation, we again incremented by 50 from -200 to 200. In the plot below, we see the relationships between BIC score and $d_{ij}$ for each migration type while holding $d_{ij}$ constant at 0 for all other migration types. For migration to rural destinations (represented by orange $d_{rr}$ and red $d_{ru}$), the minimum BIC score occurs when there is no difference in health between origin and destination. However, for migration to urban destinations, there is some evidence of lower BIC scores when urban origins have lower age-adjusted premature mortality rates than their correpsonding urban destinations (represented by $d_{uu}$). In this case, movers tend to migrate from healthier urban counties to less healthy urban counties.
+In our urbanicity-specific simulation, we started with increments of 50, ranging from -200 to 200, resulting in a total of 6,561 unique sets of $(d_{uu}, d_{rr}, d_{ru}, d_{ur})$. This coarse search identified a minimum BIC score for the set $(d_{uu} =-100, d_{rr}=0, d_{ru}=0, d_{ur}=0)$. To verify this minimum and the trends observed in the coarse search, we refined our increment to 20. Specifically, we tested $d_{uu}$ values from -140 to 20 to include the previously identified minimum and the null hypothesis $d_{uu}=0$. For other types of migration, represented by $d_{ur}$, $d_{ru}$, and $d_{rr}$ we tested a range of -80 to 80 around 0, which was the value producing the minimum BIC score in our coarse search. This refined search resulted in an additional 6,561 unique sets of $(d_{uu}, d_{rr}, d_{ru}, d_{ur})$.
 
-```{r}
-#load("data_processed/bick_restrict.Rdata")
+The results of this narrowed search were largely consistent with our coarse search findings, with a minimum BIC score for the set $(d_{uu} =-100, d_{rr}=0, d_{ru}=0, d_{ur}=20)$. The plot below illustrates the relationship between BIC scores and $d_{ij}$​ for each migration type, while holding other $d_{ij}$​ values constant at 0. For migration to rural destinations (orange $d_{rr}$​ and red $d_{ru}$​), the minimum BIC score occurs when there is no health difference between origin and destination. However, for urban-to-urban migration (blue $d_{uu}$​), lower BIC scores are observed when urban origins have lower age-adjusted premature mortality rates than urban destinations, suggesting that movers tend to migrate from healthier urban counties to less healthy urban counties. For rural-to-urban migration, there is some indication that rural origins have higher age-adjusted premature mortality rates compared to their urban destinations, as indicated by the minimum BIC score occurring at $d_{ur} =20$. However, the relationship between $d_{ur}$​ and BIC score appears to be approximately linear, with all BIC scores remaining close to the minimum, regardless of the value of $d_{ur}$. Therefore, there is little evidence of health-related selection from rural origins to urban destinations. This is likely because the larger populations in urban counties make their average health less affected by relatively small numbers of migrants from rural counties.
+
+The minimum BIC score occuring at $d_{uu}=-100$ supports the healthy migrant hypothesis, indicating that migrants from urban areas are healthier on average than their urban destinations. Interestingly, although the trends for $d_{rr}$ and $d_{ru}$ are similar, BIC scores are slightly lower for positive values of $d_{rr}$ and slightly higher for negative values of $d_{rr}$ while the pattern in BIC associated with $d_{ru}$ is opposite. This suggests that migrants from rural origins might be slightly less healthy on average compared to their rural destinations, while migrants from urban origins may be slightly healthier on average than their rural destinations. However, since the minimum BIC score occurs when both $d_{rr}$ and $d_{ru}$ are equal to 0, we cannot definitively conclude that health-related factors drive migration from rural to rural or from urban to rural counties. Further detailed analysis focusing specifically on migration to rural destinations could provide deeper insights into these patterns.
+
+```{r plot with special kuu outputs }
+
+load("data_processed/bick_restrict_kuuspecial.Rdata")
 load("data_processed/bickdf.Rdata")
 # Combine the datasets and convert columns to numeric
-#bicktot <- rbind(bick_restrict, bickdf) %>%
- bicktot = bicktot %>%  mutate(
+bicktot <- rbind(bick_restrict_kuuspecial, bickdf) %>%
+ mutate(
     kur = as.numeric(kur),
     krr = as.numeric(krr),
     kuu = as.numeric(kuu),
@@ -332,10 +356,16 @@ mostex <- bicktot %>% filter(bicspat == min(bicspat))
 
 
 # Create a combined dataset for plotting
+# bicmin_kuu <- bicktot %>% filter(kru == mostex$kru & krr == mostex$krr & kur == mostex$kur) %>% mutate(type = "kuu")
+# bicmin_krr <- bicktot %>% filter(kru == mostex$kru & kuu == mostex$kuu & kur == mostex$kur) %>% mutate(type = "krr")
+# bicmin_kur <- bicktot %>% filter(kru == mostex$kru & krr == mostex$krr & kuu == mostex$kuu) %>% mutate(type = "kur")
+# bicmin_kru <- bicktot %>% filter(kur == mostex$kur & krr == mostex$krr & kuu == mostex$kuu) %>% mutate(type = "kru")
+
 bicmin_kuu <- bicktot %>% filter(kru == 0 & krr == 0 & kur == 0) %>% mutate(type = "kuu")
 bicmin_krr <- bicktot %>% filter(kru == 0 & kuu == 0 & kur == 0) %>% mutate(type = "krr")
 bicmin_kur <- bicktot %>% filter(kru == 0 & krr == 0 & kuu == 0) %>% mutate(type = "kur")
 bicmin_kru <- bicktot %>% filter(kur == 0 & krr == 0 & kuu == 0) %>% mutate(type = "kru")
+
 
 # Combine the datasets for plotting
 bicmin_combined <- bind_rows(bicmin_kuu, bicmin_krr, bicmin_kur, bicmin_kru)
@@ -352,14 +382,32 @@ ggplot(bicmin_combined, aes(x = as.numeric(case_when(
   xlab(expression(d[ij])) +
   ylab("BIC") +
   theme_bw() +
-  labs(subtitle = expression(paste("Relationship between BIC and ", d[ij], "\n (assuming that other parameters are held constant at 0)")),
+  labs(subtitle = expression(paste("Relationship between BIC and ", d[ij], "with all other ", d[ij], " held constant at 0")),
        title = "Urban-Rural Migration") +
   scale_color_manual(values = c("kuu" = "#1f77b4", "krr" = "#ff7f0e", "kur" = "#2ca02c", "kru" = "#d62728"),
-                     labels = c("kuu" = expression(paste(d[uu], " when all other parameters are held constant at 0")),
-                                "krr" = expression(paste(d[rr], " when all other parameters are held constant at 0")),
-                                "kur" = expression(paste(d[ur], " when all other parameters are held constant at 0")),
-                                "kru" = expression(paste(d[ru], " when all other parameters are held constant at 0")))) +
-  guides(color = guide_legend(title = NULL))
+                     labels = c("kuu" = expression(paste(d[uu])),#, " when all other parameters are held constant at 0")),
+                                "krr" = expression(paste(d[rr])),#, " when all other parameters are held constant at 0")),
+                                "kur" = expression(paste(d[ur])),#, " when all other parameters are held constant at 0")),
+                                "kru" = expression(paste(d[ru])))) +# " when all other parameters are held constant at 0"))) +
+  guides(color = guide_legend(title = NULL)) +
+  geom_hline(yintercept = min(bicktot$bicspat), linetype = "dashed", color = "black", size = 1) +
+  annotate("text", x = 60, y = min(bicktot$bicspat), label = "Min BIC", vjust = 1, hjust = -0.1)
 ```
 
-Based on the trends shown in the plot above, we narrowed our search increment to 20 and tested a specific range of \$d\_{uu}\$ values to account for a -140 to 20 difference in age-adjusted premature mortality rates between urban origin and urban destination. For all other types of migration, we used the same range. Therefore, we tested \$d\_{ur}\$, \$d\_{rr}\$, and \$d\_{ru}\$ values with a range of -80 to 80 difference between origin and destination. This resulted in an additional 6,561 unique sets of $(d_{uu}, d_{rr}, d_{ru}, d_{ur})$. <!--# this is the same wording as in the methods section...  -->The results of this narrowed search are shown below:
+### Discussion and Limitations {.underline}
+
+We consider several pitfalls and alternatives. First, because our migration term is essentially a weighted average of the mortality rates of origin counties, the migration term and lagged mortality rates are highly correlated, resulting in multicollinearity. As a result, we cannot easily interpret the direct effect of the migration term itself. However, its inclusion clearly enhances the model's overall explanatory power, which is valuable for understanding county-level health.
+
+The use of county-level premature age-adjusted mortality as the outcome of interest offers both strengths and limitations. While this measure allows for comparability across different times and locations and has a robust definition, it does not perfectly align with the demographics of migrating populations. The median age of movers in the US is under 30 years [@s0701:g], suggesting a potential mismatch since mortality primarily results from chronic diseases with long latency periods. Although previous research indicates that health differences among immigrants can be detected within a relatively short period, applying this to our study assumes similar dynamics for non-infectious diseases [@vanaart2017a]. Nonetheless, county-level measures of premature mortality are widely used as a proxy for overall county health. For example, a 1983 WHO report recommended mortality and morbidity measures to understand health and migration [@gushulak2006], and length of life measures hold 50% weight in the County Health Rankings Model of place-based health outcomes [@explore].
+
+Another significant limitation is the reliance on IRS data, which includes only approximately 45% of the total US population [@newesti2015; @desilver2023]. Excluded groups, such as university students, low-income individuals, and informal workers [@dewaard2022], are systematically missing from our analysis, possibly biasing the results. Despite these limitations, IRS migration data has been used many times in the past to complete complex and accurate analyses of US migration patterns. For instance, IRS migration flow data has been used to estimate the effects of sea-level rise on geographic distribution of the US population [@hauer2017], measure recovery after Hurricanes Katrina and Rita [@curtis2015], and assess the economic impacts of migration resulting from environmental hazards [@shumway2014].
+
+We attempt to leverage the limitations of the IRS data as a strength in our analyses: because IRS county-to-county migration data includes only individuals who file taxes with the US government both before and after they migrate, we assume that individuals represented in the IRS migration flows data are more homogeneous than migrants excluded from IRS estimates since they may be less likely to have been pushed to migrate by potentially health-related factors such as violence, famine, and corruption than individuals who migrate but are excluded from the IRS data. Therefore, any differences in changes in health between counties may be the result of self-selection by IRS-represented migrants or health-related selection by non-IRS-represented migrants.
+
+Additionally, while the data quality issues identified in the post-2011-2012 IRS migration data are concerning [@dewaard2022], we believe that the added temporal volatility does not undermine our conclusions. Since our analysis examines the US as a whole and focuses on rural/urban differences, all counties are presumably treated similarly. This uniform treatment across counties suggests that the relative comparisons between rural and urban areas remain valid, and the temporal volatility should not disproportionately affect one type of county over another.
+
+Finally, our data precedes the COVID-19 pandemic, which significantly altered migration patterns and health outcomes. According to the Chicago Federal Reserve Bank, state-to-state moves were 15.1% higher pre-pandemic than during the pandemic [@u.s.mig], and rates of domestic migration and international migration decreased in urban counties in 2020 while domestic migration increased in suburban counties in 2020 [@pandemic]. Future studies should consider the pandemic's impact to provide a more current understanding of migration and health dynamics. Understanding these shifts is crucial for developing policies that address the evolving needs of migrating populations in a post-pandemic world.
+
+### [Conclusion]{.underline}
+
+There are many factors that contribute to the health of a place. In our analyses, we have chosen to emphasize the potential impact of migration or movement between places on place-based health. We accounted for intercounty selection for migration (ie some counties are more likely to experience migration than others) using our weighted average migration term and intracounty selection for migration (ie some individuals are more likely to migrate than others) using our $d_{ij}$ simulation. We cannot fully understand county-level health without first understanding county interconnectedness and how it drives place-based health disparities. Recognizing that the United States is heterogeneous and that the mechanisms by which migration may impact health may also be heterogeneous, we attempt to quantify rural-urban differences in the relationship between migration and place-based health. The long-term goal of this work is to contribute to understanding the mechanisms by which mobility may be related to place-based health disparities so that local decision-makers may account for patterns in mobility when creating policy towards improved health for all people in all places. Understanding rural-urban mobility patterns is a necessary first step towards understanding rural-urban health disparities.

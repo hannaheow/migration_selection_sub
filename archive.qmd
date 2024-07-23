@@ -356,3 +356,50 @@ ggplot(aes(x = as.numeric(kru), y = as.numeric(bicspat), color = as.factor(color
     labels = c("0" = expression(d[rr] <= 0), 
                "1" = expression(d[rr] >0)))
 ```
+
+```{r plot with separate kuu, krr, kur, kru held at 0 , broad search }
+#load("data_processed/bick_restrict.Rdata")
+load("data_processed/bickdf.Rdata")
+# Combine the datasets and convert columns to numeric
+#bicktot <- rbind(bick_restrict, bickdf) %>%
+ bicktot = bicktot %>%  mutate(
+    kur = as.numeric(kur),
+    krr = as.numeric(krr),
+    kuu = as.numeric(kuu),
+    kru = as.numeric(kru)
+  )
+
+# Find the most explanatory set
+mostex <- bicktot %>% filter(bicspat == min(bicspat))
+
+
+# Create a combined dataset for plotting
+bicmin_kuu <- bicktot %>% filter(kru == 0 & krr == 0 & kur == 0) %>% mutate(type = "kuu")
+bicmin_krr <- bicktot %>% filter(kru == 0 & kuu == 0 & kur == 0) %>% mutate(type = "krr")
+bicmin_kur <- bicktot %>% filter(kru == 0 & krr == 0 & kuu == 0) %>% mutate(type = "kur")
+bicmin_kru <- bicktot %>% filter(kur == 0 & krr == 0 & kuu == 0) %>% mutate(type = "kru")
+
+# Combine the datasets for plotting
+bicmin_combined <- bind_rows(bicmin_kuu, bicmin_krr, bicmin_kur, bicmin_kru)
+
+# Plot
+ggplot(bicmin_combined, aes(x = as.numeric(case_when(
+  type == "kuu" ~ kuu,
+  type == "krr" ~ krr,
+  type == "kur" ~ kur,
+  type == "kru" ~ kru
+)), y = as.numeric(bicspat), color = type)) +
+  geom_point() +
+  geom_line() +
+  xlab(expression(d[ij])) +
+  ylab("BIC") +
+  theme_bw() +
+  labs(subtitle = expression(paste("Relationship between BIC and ", d[ij], "\n (assuming that other parameters are held constant at 0)")),
+       title = "Urban-Rural Migration") +
+  scale_color_manual(values = c("kuu" = "#1f77b4", "krr" = "#ff7f0e", "kur" = "#2ca02c", "kru" = "#d62728"),
+                     labels = c("kuu" = expression(paste(d[uu], " when all other parameters are held constant at 0")),
+                                "krr" = expression(paste(d[rr], " when all other parameters are held constant at 0")),
+                                "kur" = expression(paste(d[ur], " when all other parameters are held constant at 0")),
+                                "kru" = expression(paste(d[ru], " when all other parameters are held constant at 0")))) +
+  guides(color = guide_legend(title = NULL))
+```

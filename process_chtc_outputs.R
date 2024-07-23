@@ -78,6 +78,23 @@ save(bick_restrict_kurkru, file= "data_processed/bick_restrict_kurkru.Rdata")
 
 
 
+#########################################################################
+# process the special kuu sim 
+
+files = list.files("chtc_outputs/output_bick_kuuspecial")
+
+bick_restrict_kuuspecial = data.frame()
+
+for (i in 1:length(files)){
+  load(paste0("chtc_outputs/output_bick_kuuspecial/",files[i]))
+  tempdat = bickij_int
+  bick_restrict_kuuspecial = rbind(bick_restrict_kuuspecial, tempdat)
+}
+
+save(bick_restrict_kuuspecial, file= "data_processed/bick_restrict_kuuspecial.Rdata")
+
+
+
 
 
 
